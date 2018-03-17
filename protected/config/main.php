@@ -60,7 +60,7 @@ return array(
 			'connectionString' => 'mysql:host=localhost;dbname=dinner',
 			'emulatePrepare' => true,
 			'username' => 'root',
-			'password' => 'a15119682750',
+			'password' => 'root',
 			'charset' => 'utf8',
 			'tablePrefix' => 'liv_',
 		),
