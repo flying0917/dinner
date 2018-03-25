@@ -222,7 +222,52 @@ class SiteController extends FormerController
 			'message'	=> $message,
 		));
 	}
-	
+
+    //进入某个餐厅获取菜单ajax
+    public function actionGetMenu()
+    {
+        $shop_id = Yii::app()->request->getParam('shop_id');
+        if(!isset($shop_id))
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '请选择一家餐厅'));
+        }
+
+        //查询出改商店的一些详细信息
+        $shopData = Shops::model()->findByPk($shop_id);
+        if(!$shopData)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在'));
+        }
+        $shopData = CJSON::decode(CJSON::encode($shopData));
+
+        //判断改商家有没有下市场
+        if(intval($shopData['status']) != 2)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在或者已经倒闭了！'));
+        }
+
+        //根据店铺id查询出该店铺的菜单
+        $menuData = Menus::model()->with('food_sort','image','shops')->findAll(array('condition' => 't.shop_id=:shop_id AND t.status=:status','params' => array(':shop_id' => $shop_id,':status' => 2)));
+        $data = array();
+        foreach($menuData AS $k => $v)
+        {
+            $data[$k] = $v->attributes;
+            $data[$k]['index_pic'] = $v->index_pic?Yii::app()->params['img_url'] . $v->image->filepath . $v->image->filename:'';
+            $data[$k]['sort_name'] = $v->food_sort->name;
+            $data[$k]['shop_name'] = $v->shops->name;
+            $data[$k]['create_time'] = Yii::app()->format->formatDate($v->create_time);
+            $data[$k]['status'] = Yii::app()->params['menu_status'][$v->status];
+            $data[$k]['price'] = $v->price;
+        }
+
+
+        $resData=array(
+            'menus' 	=> $data,
+            'shop' 		=> $shopData,
+        );
+        $this->output(array('success'=>1,'data'=>$resData,'msg'=>'获取饭店菜单成功'));
+    }
+
 	//查看购物车
 	public function actionLookCart()
 	{
