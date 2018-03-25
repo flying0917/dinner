@@ -284,7 +284,28 @@ class SiteController extends FormerController
 		$memberData = CJSON::decode(CJSON::encode($memberData));
 		$this->render('membercenter',array('member' => $memberData));
 	}
-	
+
+
+    //获取用户数据通过ajax
+    public function actionGetUserInfo()
+    {
+        //查询出用户的基本信息
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria=new CDbCriteria;
+        $criteria->select = 'name,sex,avatar,email,balance';
+        $criteria->condition = 'id=:id';
+        $criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($criteria);
+        $memberData = CJSON::decode(CJSON::encode($memberData));
+        if(isset($memberData))
+        {
+            $this->output(array('success' =>1,'msg'=>'获取用户信息成功','data'=>array('member'=>$memberData)));
+        }
+        else
+        {
+            $this->errorOutput(array('error' => 1,'msg'=>'获取用户信息失败'));
+        }
+    }
 	//查询用户自己的订单
 	public function actionMyOrder()
 	{
