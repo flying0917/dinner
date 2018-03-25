@@ -117,6 +117,29 @@ class SiteController extends FormerController
 		);		
 		$this->render('index',$output);
 	}
+
+	//ajax获取饭店
+    public function actionGetShop()
+    {
+        //取出商家的数据
+        $model = Shops::model()->with('image')->findAll('t.status=:status',array(':status' => 2));
+        $shopData = array();
+        foreach($model AS $k => $v)
+        {
+            $shopData[$k] = $v->attributes;
+            $shopData[$k]['logo'] = $shopData[$k]['logo']?Yii::app()->params['img_url'] . $v->image->filepath . $v->image->filename:'';
+        }
+        $this->output(array('success' =>1,'msg'=>'获取饭店列表成功','data'=>array('shops'=>$shopData)));
+    }
+
+    //ajax获取公告
+    public function actionGetArticle()
+    {
+        //取出公告数据
+        $notice = Announcement::model()->findAll(array('order' => 'create_time DESC','condition' => 'status=:status','params'=>array(':status'=>2)));
+        $notice = CJSON::decode(CJSON::encode($notice));
+        $this->output(array('success' =>1,'msg'=>'获取公告列表成功','data'=>array('announce'=>$notice)));
+    }
 	
 	//进入某个餐厅查看菜单
 	public function actionLookMenu()
