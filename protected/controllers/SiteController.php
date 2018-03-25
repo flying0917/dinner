@@ -378,7 +378,6 @@ class SiteController extends FormerController
 		$identity->authenticate();
 		
 		//登录成功
-        echo $identity->errorCode;
 		if($identity->errorCode===MemberIdentity::ERROR_NONE)
 		{
 			$duration = 3600*24*30;//保持一个月
