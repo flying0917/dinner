@@ -223,6 +223,37 @@ class SiteController extends FormerController
 		));
 	}
 
+    //进入某个餐厅信息ajax
+    public function actionGetShopInfo()
+    {
+        $shop_id = Yii::app()->request->getParam('shop_id');
+        if(!isset($shop_id))
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '请选择一家餐厅'));
+        }
+
+        //查询出改商店的一些详细信息
+        $shopData = Shops::model()->findByPk($shop_id);
+        if(!$shopData)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在'));
+        }
+        $shopData = CJSON::decode(CJSON::encode($shopData));
+
+        //判断改商家有没有下市场
+        if(intval($shopData['status']) != 2)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在或者已经倒闭了！'));
+        }
+
+
+
+        $resData=array(
+            'shop' 		=> $shopData,
+        );
+        $this->output(array('success'=>1,'data'=>$resData,'msg'=>'获取饭店信息成功'));
+    }
+
     //进入某个餐厅获取菜单ajax
     public function actionGetMenu()
     {
@@ -262,8 +293,7 @@ class SiteController extends FormerController
 
 
         $resData=array(
-            'menus' 	=> $data,
-            'shop' 		=> $shopData,
+            'menus' 	=> $data
         );
         $this->output(array('success'=>1,'data'=>$resData,'msg'=>'获取饭店菜单成功'));
     }
