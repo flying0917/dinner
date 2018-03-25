@@ -129,7 +129,7 @@ class SiteController extends FormerController
             $shopData[$k] = $v->attributes;
             $shopData[$k]['logo'] = $shopData[$k]['logo']?Yii::app()->params['img_url'] . $v->image->filepath . $v->image->filename:'';
         }
-        $this->output(array('success' =>1,'msg'=>'获取饭店列表成功','data'=>array('shops'=>$shopData)));
+        $this->output(array('success' =>1,'msg'=>'获取饭店列表成功','data'=>array('shops'=>$shopData,'isOnTime'  => Yii::app()->check_time->isOnTime())));
     }
 
     //ajax获取公告
