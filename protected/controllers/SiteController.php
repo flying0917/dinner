@@ -365,12 +365,12 @@ class SiteController extends FormerController
 
 		if(!$name)
 		{
-			$this->errorOutput(array('error' => 1));
+			$this->errorOutput(array('error' => 1,'msg'=>'用户名不能为空'));
 		}
 		
 		if(!$password)
 		{
-			$this->errorOutput(array('error' => 2));
+			$this->errorOutput(array('error' => 2,'msg'=>'密码不能为空'));
 		}
 		
 		//利用MemberIdentity来验证
@@ -378,15 +378,16 @@ class SiteController extends FormerController
 		$identity->authenticate();
 		
 		//登录成功
+        echo $identity->errorCode;
 		if($identity->errorCode===MemberIdentity::ERROR_NONE)
 		{
 			$duration = 3600*24*30;//保持一个月
 			Yii::app()->user->login($identity,$duration);
-			$this->errorOutput(array('error' => 4));
+			$this->output(array('success' =>1,'msg'=>'登录成功'));
 		}
 		else
 		{
-			$this->errorOutput(array('error' => 3));		
+			$this->errorOutput(array('error' => 3,'msg'=>'用户名或者密码错误'));
 		}		
 	}
 	
