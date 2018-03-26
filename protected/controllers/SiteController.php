@@ -293,7 +293,8 @@ class SiteController extends FormerController
 
 
         $resData=array(
-            'menus' 	=> $data
+            'menus' 	=> $data,
+            'shop'=>$shopData
         );
         $this->output(array('success'=>1,'data'=>$resData,'msg'=>'获取饭店菜单成功'));
     }
@@ -303,6 +304,8 @@ class SiteController extends FormerController
 	{
 		$this->render('lookcart',array('order' => $this->order));
 	}
+
+
 	
 	//确认下单
 	public function actionConfirmOrder()
