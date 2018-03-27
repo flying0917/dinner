@@ -306,11 +306,58 @@ class SiteController extends FormerController
 	}
 
 
+	//确认下单ajax
+    public function actionConfirmOrderAjax()
+    {
+        $orderFromApp = Yii::app()->request->getPost('order');
+        if(isset($orderFromApp))
+        {
+            $orderFromApp = json_decode($orderFromApp, true);
+            //确认订单之前查看用户余额够不够付
+
+            $memberInfo = Members::model()->find('id=:id',array(':id' => Yii::app()->user->member_userinfo['id']));
+            if($memberInfo->balance < $orderFromApp['Total'] && !in_array(Yii::app()->user->member_userinfo['id'], Yii::app()->params['allow_user_id']))
+            {
+                throw new CHttpException(404,Yii::t('yii','亲！您的账户余额不足，不能下单哦，到前台妹子交钱吧！'));
+            }
+
+            //构建数据
+            $foodOrder = new FoodOrder();
+            $foodOrder->shop_id = $orderFromApp['shop_id'];
+            $foodOrder->order_number = date('YmdHis',time()) . Common::getRandNums(6);
+            $foodOrder->food_user_id = Yii::app()->user->member_userinfo['id'];
+            $foodOrder->total_price = $orderFromApp['Total'];
+            $foodOrder->create_time = time();
+            $foodOrder->product_info = serialize($orderFromApp['Items']);
+
+            if($foodOrder->save())
+            {
+                //记录订单动态
+                $foodOrderLog = new FoodOrderLog();
+                $foodOrderLog->food_order_id = $foodOrder->id;
+                $foodOrderLog->create_time = time();
+                if($foodOrderLog->save())
+                {
+                    $this->output(array("success"=>1,"msg"=>"下单成功，请等待配送"));
+                }
+
+            }
+            else
+            {
+                $this->errorOutput(array("error"=>1,"msg"=>"下单失败"));
+            }
+        }
+        else
+        {
+            $this->errorOutput(array("error"=>1,"msg"=>"购物车为空"));
+        }
+    }
 	
 	//确认下单
 	public function actionConfirmOrder()
 	{
 		//确认订单之前查看用户余额够不够付
+
 		$memberInfo = Members::model()->find('id=:id',array(':id' => Yii::app()->user->member_userinfo['id']));
 		if($memberInfo->balance < $this->order['Total'] && !in_array(Yii::app()->user->member_userinfo['id'], Yii::app()->params['allow_user_id'])) 
 		{
