@@ -344,12 +344,12 @@ class SiteController extends FormerController
             }
             else
             {
-                $this->errorOutput(array("error"=>1,"msg"=>"下单失败"));
+                $this->errorOutput(array("errorCode"=>1,"errorText"=>"下单失败"));
             }
         }
         else
         {
-            $this->errorOutput(array("error"=>1,"msg"=>"购物车为空"));
+            $this->errorOutput(array("errorCode"=>1,"errorTet"=>"购物车为空"));
         }
     }
 	
