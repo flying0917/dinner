@@ -331,8 +331,6 @@ class SiteController extends FormerController
             $foodOrder->create_time = time();
             $foodOrder->product_info = serialize($orderFromApp['Items']);
             $foodOrder->address = $address;
-
-
             if($foodOrder->save())
             {
                 //记录订单动态
