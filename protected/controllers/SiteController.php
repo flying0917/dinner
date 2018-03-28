@@ -310,16 +310,17 @@ class SiteController extends FormerController
     public function actionConfirmOrderAjax()
     {
         $orderFromApp = Yii::app()->request->getPost('order');
+        $address=Yii::app()->request->getPost('address');
         if(isset($orderFromApp))
         {
             $orderFromApp = json_decode($orderFromApp, true);
             //确认订单之前查看用户余额够不够付
 
-            $memberInfo = Members::model()->find('id=:id',array(':id' => Yii::app()->user->member_userinfo['id']));
+            /*$memberInfo = Members::model()->find('id=:id',array(':id' => Yii::app()->user->member_userinfo['id']));
             if($memberInfo->balance < $orderFromApp['Total'] && !in_array(Yii::app()->user->member_userinfo['id'], Yii::app()->params['allow_user_id']))
             {
                 throw new CHttpException(404,Yii::t('yii','亲！您的账户余额不足，不能下单哦，到前台妹子交钱吧！'));
-            }
+            }*/
 
             //构建数据
             $foodOrder = new FoodOrder();
@@ -329,6 +330,8 @@ class SiteController extends FormerController
             $foodOrder->total_price = $orderFromApp['Total'];
             $foodOrder->create_time = time();
             $foodOrder->product_info = serialize($orderFromApp['Items']);
+            $foodOrder->address = $address;
+
 
             if($foodOrder->save())
             {
@@ -338,7 +341,7 @@ class SiteController extends FormerController
                 $foodOrderLog->create_time = time();
                 if($foodOrderLog->save())
                 {
-                    $this->output(array("success"=>1,"msg"=>"下单成功，请等待配送"));
+                    $this->output(array("success"=>1,"msg"=>"下单成功，请等待配送","data"=>$foodOrderLog->food_order_id));
                 }
 
             }
@@ -453,6 +456,29 @@ class SiteController extends FormerController
         {
             $this->errorOutput(array('error' => 1,'msg'=>'获取用户信息失败'));
         }
+    }
+    //通过id查询用户订单信息ajax
+    public function actionMyOrderAjax()
+    {
+        $shop_id = Yii::app()->request->getParam('order_id');
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria = new CDbCriteria;
+        $criteria->order = 't.create_time DESC';
+        $criteria->select = '*';
+        $criteria->condition = 'food_user_id=:food_user_id';
+        $criteria->params = array(':food_user_id' => $member_id);
+
+        //构建分页
+        $count=FoodOrder::model()->count($criteria);
+        $pages = new CPagination($count);
+        $pages->pageSize = Yii::app()->params['pagesize'];
+        $pages->applyLimit($criteria);
+        //按条件获取数据
+
+        $orderData = FoodOrder::model()->findByPk($shop_id);
+
+        $orderData = CJSON::decode(CJSON::encode($orderData));
+        print_r($orderData);
     }
 	//查询用户自己的订单
 	public function actionMyOrder()

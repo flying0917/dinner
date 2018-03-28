@@ -9,6 +9,8 @@
  * @property integer $pay_time
  * @property integer $status
  * @property integer $food_user_id
+ * @property integer $total_price
+ * @property string $address
  */
 class FoodOrder extends CActiveRecord
 {
