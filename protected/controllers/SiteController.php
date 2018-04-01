@@ -503,6 +503,86 @@ class SiteController extends FormerController
         $orderData = CJSON::decode(CJSON::encode($orderData));
         $this->output(array('success' => 1,'successText' => '获取订单信息成功',"data"=>$orderData));
     }
+    //查询用户自己的订单列表AJAX
+    public function actionMyOrderListAjax()
+    {
+       /* $is_today = Yii::app()->request->getParam('today');*/
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria = new CDbCriteria;
+        $criteria->order = 't.create_time DESC';
+        $criteria->select = '*';
+        $criteria->condition = 'food_user_id=:food_user_id';
+        $criteria->params = array(':food_user_id' => $member_id);
+
+        //构建分页
+        $count=FoodOrder::model()->count($criteria);
+        $pages = new CPagination($count);
+        $pages->pageSize = Yii::app()->params['pagesize'];
+        $pages->applyLimit($criteria);
+        //按条件获取数据
+
+        $model = FoodOrder::model()->with('shops','food_log')->findAll($criteria);
+        $orderData = array();
+        foreach ($model AS $k => $v)
+        {
+            /*if($is_today)
+            {
+                //只取今天的订单
+                if(date('Ymd',$v->create_time) != date('Ymd',time()))
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                //排除今天的订单
+                if(date('Ymd',$v->create_time) == date('Ymd',time()))
+                {
+                    continue;
+                }
+            }*/
+
+            $orderData[$k] = $v->attributes;
+            $orderData[$k]['shop_name'] = $v->shops->name;
+            $orderData[$k]['product_info'] = unserialize($v->product_info);
+            //添加总个数和总价信息
+            $orderData[$k]["total"]=0;
+            $orderData[$k]["Count"]=0;
+            foreach($orderData[$k]["product_info"] AS $ks=>$vs)
+            {
+                $orderData[$k]["product_info"][$ks]["total"]=intval($vs["Count"])*floatval($vs["Price"]);
+                $orderData[$k]["total"]+=$orderData[$k]["product_info"][$ks]["total"];
+
+                $orderData[$k]["Count"]+=intval($vs["Count"]);
+
+            }
+
+            //给订单信息添加描述
+            $orderText="";
+            foreach ($orderData[$k]['product_info'] AS $key=>$value)
+            {
+                if($key<2)
+                {
+                    $orderText.=$value["Name"].'+';
+                }
+            }
+            $orderText.=" 等".$orderData[$k]["Count"].'件商品';
+            $orderData[$k]['order_text']=$orderText;
+
+            $orderData[$k]['create_order_date'] = date('Y-m-d',$v->create_time);
+            $orderData[$k]['create_time'] = date('H:i:s',$v->create_time);
+            $orderData[$k]['status_text'] = Yii::app()->params['order_status'][$v->status];
+            //订单状态日志
+            $status_log = CJSON::decode(CJSON::encode($v->food_log));
+            foreach ($status_log AS $kk => $vv)
+            {
+                $status_log[$kk]['status_text'] = Yii::app()->params['order_status'][$vv['status']];
+                $status_log[$kk]['create_time'] = date('H:i:s',$vv['create_time']);
+            }
+            $orderData[$k]['status_log'] = $status_log;
+        }
+        $this->output(array('success' => 1,'successText' => '获取订单信息成功',"data"=>$orderData));
+    }
 	//查询用户自己的订单
 	public function actionMyOrder()
 	{
