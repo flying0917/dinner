@@ -473,10 +473,25 @@ class SiteController extends FormerController
         $pages->applyLimit($criteria);
         //按条件获取数据
 
-        $orderData = FoodOrder::model()->findByPk($order_id);
+        $orderData = FoodOrder::model()->with('shops','food_log')->findByPk($order_id);
 
         $orderData->product_info=unserialize($orderData->product_info);
 
+        $orderData->shop_name = $orderData->shops->name;
+        $orderData->create_order_date = date('Y-m-d',$orderData->create_time);
+        $orderData->create_time = date('H:i:s',$orderData->create_time);
+        $orderData->status_text = Yii::app()->params['order_status'][$orderData->status];
+
+        //订单状态日志
+        $status_log = CJSON::decode(CJSON::encode($orderData->food_log));
+
+        foreach ($status_log AS $kk => $vv)
+        {
+            $status_log[$kk]['status_text'] = Yii::app()->params['order_status'][$vv['status']];
+            $status_log[$kk]['create_time'] = date('H:i:s',$vv['create_time']);
+        }
+
+        $orderData['status_log'] = $status_log;
         $orderData = CJSON::decode(CJSON::encode($orderData));
         $this->output(array('success' => 1,'successText' => '获取订单信息成功',"data"=>$orderData));
     }
