@@ -477,6 +477,7 @@ class SiteController extends FormerController
 
         $orderData->product_info=unserialize($orderData->product_info);
 
+        print_r($orderData->shops);
         $orderData->shop_name = $orderData->shops->shop_name;
         $orderData->create_order_date = date('Y-m-d',$orderData->create_time);
         $orderData->create_time = date('H:i:s',$orderData->create_time);
