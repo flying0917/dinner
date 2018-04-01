@@ -476,8 +476,15 @@ class SiteController extends FormerController
         $orderDatas = FoodOrder::model()->with('shops','food_log')->findByPk($order_id);
         $orderData=array();
         $orderData["product_info"]=unserialize($orderDatas->product_info);
-
+        $orderData["total"]=0;
+        foreach($orderData["product_info"] AS $key=>$value)
+        {
+            $orderData["product_info"][$key]["total"]=intval($value->Count)*floatval($value->Price);
+            $orderData["total"]+=$orderData["product_info"][$key]["total"];
+        }
         $orderData["shop_name"] = $orderDatas->shops->name;
+        $orderData["shop_id"] = $orderDatas->shops->id;
+        $orderData["address"] = $orderDatas->shops->address;
         $orderData["create_order_date"] = date('Y-m-d',$orderDatas->create_time);
         $orderData["create_time"] = date('H:i:s',$orderDatas->create_time);
         $orderData["status_text"] = Yii::app()->params['order_status'][$orderDatas->status];
