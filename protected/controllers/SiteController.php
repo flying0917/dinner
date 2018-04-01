@@ -339,7 +339,7 @@ class SiteController extends FormerController
                 $foodOrderLog->create_time = time();
                 if($foodOrderLog->save())
                 {
-                    $this->output(array("success"=>1,"msg"=>"下单成功，请等待配送","data"=>$foodOrderLog->food_order_id));
+                    $this->output(array("success"=>1,"msg"=>"下单成功，请等待配送","data"=>array("order_id"=>$foodOrderLog->food_order_id)));
                 }
 
             }
@@ -384,7 +384,7 @@ class SiteController extends FormerController
 			{
 				//清空购物车
 				unset(Yii::app()->request->cookies['cart']);
-				$this->redirect(Yii::app()->createUrl('site/orderok',array('ordernumber' => $foodOrder->order_number)));
+				//$this->redirect(Yii::app()->createUrl('site/orderok',array('ordernumber' => $foodOrder->order_number)));
 			}
 		}
 		else 
@@ -458,7 +458,7 @@ class SiteController extends FormerController
     //通过id查询用户订单信息ajax
     public function actionMyOrderAjax()
     {
-        $shop_id = Yii::app()->request->getParam('order_id');
+        $order_id = Yii::app()->request->getParam('order_id');
         $member_id = Yii::app()->user->member_userinfo['id'];
         $criteria = new CDbCriteria;
         $criteria->order = 't.create_time DESC';
@@ -473,10 +473,11 @@ class SiteController extends FormerController
         $pages->applyLimit($criteria);
         //按条件获取数据
 
-        $orderData = FoodOrder::model()->findByPk($shop_id);
+        $orderData = FoodOrder::model()->findByPk($order_id);
 
         $orderData = CJSON::decode(CJSON::encode($orderData));
         print_r($orderData);
+        $this->output(array('success' => 1,'successText' => '获取订单信息成功',"data"=>$orderData));
     }
 	//查询用户自己的订单
 	public function actionMyOrder()
