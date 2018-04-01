@@ -476,7 +476,6 @@ class SiteController extends FormerController
         $orderData = FoodOrder::model()->findByPk($order_id);
 
         $orderData = CJSON::decode(CJSON::encode($orderData));
-        print_r($orderData);
         $this->output(array('success' => 1,'successText' => '获取订单信息成功',"data"=>$orderData));
     }
 	//查询用户自己的订单
