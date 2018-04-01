@@ -475,7 +475,7 @@ class SiteController extends FormerController
 
         $orderDatas = FoodOrder::model()->with('shops','food_log')->findByPk($order_id);
         $orderData=array();
-        $orderData->product_info=unserialize($orderDatas->product_info);
+        $orderData["product_info"]=unserialize($orderDatas->product_info);
 
         $orderData["shop_name"] = $orderDatas->shops->name;
         $orderData["create_order_date"] = date('Y-m-d',$orderDatas->create_time);
