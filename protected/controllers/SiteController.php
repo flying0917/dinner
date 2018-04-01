@@ -482,10 +482,10 @@ class SiteController extends FormerController
             $orderData["product_info"][$key]["total"]=intval($value["Count"])*floatval($value["Price"]);
             $orderData["total"]+=$orderData["product_info"][$key]["total"];
         }
-        print_r($orderDatas);
+        print_r($orderDatas->address);
         $orderData["shop_name"] = $orderDatas->shops->name;
         $orderData["shop_id"] = $orderDatas->shops->id;
-        $orderData["address"] = $orderDatas->shops->address;
+        $orderData["address"] = $orderDatas->address;
         $orderData["create_order_date"] = date('Y-m-d',$orderDatas->create_time);
         $orderData["create_time"] = date('H:i:s',$orderDatas->create_time);
         $orderData["status_text"] = Yii::app()->params['order_status'][$orderDatas->status];
