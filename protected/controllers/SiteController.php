@@ -753,8 +753,6 @@ class SiteController extends FormerController
 	//用户取消订单
 	public function actionCancelOrder()
 	{
-		if(Yii::app()->request->isAjaxRequest)
-		{
 			$food_order_id = Yii::app()->request->getParam('id');
 			if(!$food_order_id)
 			{
@@ -798,11 +796,6 @@ class SiteController extends FormerController
 			{
 				$this->errorOutput(array('errorCode' => 1,'errorText' => '取消订单失败'));
 			}
-		}
-		else 
-		{
-			throw new CHttpException(404,Yii::t('yii','非法操作'));
-		}
 	}
 	
 	//美食分享
