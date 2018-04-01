@@ -482,6 +482,7 @@ class SiteController extends FormerController
             $orderData["product_info"][$key]["total"]=intval($value["Count"])*floatval($value["Price"]);
             $orderData["total"]+=$orderData["product_info"][$key]["total"];
         }
+        print_r($orderDatas);
         $orderData["shop_name"] = $orderDatas->shops->name;
         $orderData["shop_id"] = $orderDatas->shops->id;
         $orderData["address"] = $orderDatas->shops->address;
