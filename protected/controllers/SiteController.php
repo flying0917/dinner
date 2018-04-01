@@ -479,7 +479,7 @@ class SiteController extends FormerController
         $orderData["total"]=0;
         foreach($orderData["product_info"] AS $key=>$value)
         {
-            $orderData["product_info"][$key]["total"]=intval($value->Count)*floatval($value->Price);
+            $orderData["product_info"][$key]["total"]=intval($value["Count"])*floatval($value["Price"]);
             $orderData["total"]+=$orderData["product_info"][$key]["total"];
         }
         $orderData["shop_name"] = $orderDatas->shops->name;
