@@ -481,6 +481,7 @@ class SiteController extends FormerController
         $orderData["create_order_date"] = date('Y-m-d',$orderDatas->create_time);
         $orderData["create_time"] = date('H:i:s',$orderDatas->create_time);
         $orderData["status_text"] = Yii::app()->params['order_status'][$orderDatas->status];
+        $orderData["order_number"] = $orderDatas->order_number;
 
         //订单状态日志
         $status_log = CJSON::decode(CJSON::encode($orderDatas->food_log));
