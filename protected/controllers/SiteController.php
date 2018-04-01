@@ -477,7 +477,7 @@ class SiteController extends FormerController
 
         $orderData->product_info=unserialize($orderData->product_info);
 
-        $orderData->shop_name = $orderData->shops->name;
+        $orderData->shop_name = $orderData->shops->shop_name;
         $orderData->create_order_date = date('Y-m-d',$orderData->create_time);
         $orderData->create_time = date('H:i:s',$orderData->create_time);
         $orderData->status_text = Yii::app()->params['order_status'][$orderData->status];
