@@ -171,7 +171,7 @@ class FoodOrderController extends Controller
 			}
 			else 
 			{
-				$this->errorOutput(array('errorCode' => 1,'errorText' => '扣款失败'));
+				$this->errorOutput(array('errorCode' => 1,'errorText' => '接单失败'));
 			}
 	}
 	

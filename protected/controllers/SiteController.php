@@ -379,6 +379,7 @@ class SiteController extends FormerController
             $criteria->compare('t.shop_id',$shopId);
         }
         $count=Menus::model()->count($criteria);
+
         //构建分页
         $currentPage = Yii::app()->request->getParam('page');
         $pageSize = Yii::app()->request->getParam('pagesize');
@@ -391,6 +392,7 @@ class SiteController extends FormerController
         $offset = ($currentPage-1) * $limit;
         $criteria->offset = $offset;
         $criteria->limit = $limit;
+
         $model = Menus::model()->with('food_sort','image','shops')->findAll($criteria);
         $data = array();
         foreach($model AS $k => $v)
@@ -1466,6 +1468,48 @@ class SiteController extends FormerController
         {
             $this->errorOutput(array('errorCode'=>0,'errorText'=>'你已经退出登录了'));
         }
+    }
+
+    //评论
+    public function actionMessageAjax()
+    {
+        //创建查询条件
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.order_id DESC';
+        //构建分页
+        $currentPage = Yii::app()->request->getParam('page');
+        $pageSize = Yii::app()->request->getParam('pagesize');
+        if(!empty($currentPage)) {
+            $currentPage = intval( $currentPage );
+        } else {
+            $currentPage = 1;
+        }
+        $limit = !empty( $pageSize ) ? intval( $pageSize ) : 10;
+        $offset = ($currentPage-1) * $limit;
+        $criteria->offset = $offset;
+        $criteria->limit = $limit;
+
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+
+        $criteria->condition="shop_id=:shop_id";
+        $criteria->params=array(':shop_id' =>$shopdata->id);
+        $model = Message::model()->with('members','shops')->findAll($criteria);
+        $data = array();
+        foreach($model AS $k => $v)
+        {
+            $data[$k] = $v->attributes;
+            $data[$k]['shop_name'] = $v->shops->name;
+            $data[$k]['user_name'] = $v->members->name;
+            $data[$k]['create_time'] = Yii::app()->format->formatDate($v->create_time);
+            $data[$k]['status_text'] = Yii::app()->params['message_status'][$v->status];
+            $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+        }
+        //输出到前端
+        $this->output(array(
+            'data' 	=> $data,
+            'success'=>1
+        ));
     }
 
 
