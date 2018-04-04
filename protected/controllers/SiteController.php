@@ -1517,7 +1517,7 @@ class SiteController extends FormerController
                 {
                     $data[$k]['replys'][$kk] = $vv->attributes;
                     $data[$k]['replys'][$kk]['create_time'] 	= date('Y-m-d H:i:s',$vv->create_time);
-                    $data[$k]['replys'][$kk]['user_name'] 	= ($vv->user_id == -1)?'商家说':$vv->members->name;
+                    $data[$k]['replys'][$kk]['user_name'] 	= ($vv->user_id == -1)?'商家回复：':$vv->members->name;
                 }
             }
         }
