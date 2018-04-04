@@ -1494,17 +1494,34 @@ class SiteController extends FormerController
 
         $criteria->condition="shop_id=:shop_id";
         $criteria->params=array(':shop_id' =>$shopdata->id);
-        $model = Message::model()->with('members','shops')->findAll($criteria);
+        $model = Message::model()->with('members','shops','replys')->findAll($criteria);
         $data = array();
         foreach($model AS $k => $v)
         {
             $data[$k] = $v->attributes;
             $data[$k]['shop_name'] = $v->shops->name;
             $data[$k]['user_name'] = $v->members->name;
-            $data[$k]['create_time'] = Yii::app()->format->formatDate($v->create_time);
+            //$data[$k]['create_time'] = Yii::app()->format->formatDate($v->create_time);
+            $data[$k]['create_time'] = date('Y-m-d H:i:s',$v->create_time);
             $data[$k]['status_text'] = Yii::app()->params['message_status'][$v->status];
             $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+
+            $_replys = Reply::model()->with('members')->findAll(array(
+                'condition' => 'message_id=:message_id',
+                'params'	=> array(':message_id' => $v->id),
+            ));
+
+            if(!empty($_replys))
+            {
+                foreach ($_replys AS $kk => $vv)
+                {
+                    $data[$k]['replys'][$kk] = $vv->attributes;
+                    $data[$k]['replys'][$kk]['create_time'] 	= date('Y-m-d H:i:s',$vv->create_time);
+                    $data[$k]['replys'][$kk]['user_name'] 	= ($vv->user_id == -1)?'商家说':$vv->members->name;
+                }
+            }
         }
+
         //输出到前端
         $this->output(array(
             'data' 	=> $data,
