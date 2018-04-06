@@ -237,6 +237,7 @@ class SiteController extends FormerController
 
         //查询出改商店的一些详细信息
         $shopData = Shops::model()->with("image")->findByPk($shop_id);
+        print_r($shopData);
         if(!$shopData)
         {
             $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在'));
@@ -249,7 +250,7 @@ class SiteController extends FormerController
             $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在或者已经倒闭了！'));
         }
 
-        var_dump($shopData);
+        //var_dump($shopData);
         $shopData['logo'] = $shopData['logo']?Yii::app()->params['img_url'] . $shopData->image->filepath . $shopData->image->filename:'';
         $resData=array(
             'shop' 		=> $shopData,
