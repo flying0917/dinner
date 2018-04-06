@@ -55,10 +55,25 @@ $(function(){
 	})
 })
 </script>
+<style>
+    #container .login h3
+    {
+        color:gray;
+        border:none;
+        cursor:pointer;
+    }
+    #container .login .active
+    {
+        color:#EB781F !important;
+        border-bottom:1px solid #EB781F !important;
+    }
+</style>
+
 <div class="login shadow" style="padding-bottom: 20px;">
+
                 <div class="login-title">
-                    <h3>
-                        用户注册</h3>
+                    <h3 class="active">普通用户注册</h3>
+                    <h3>商家用户注册</h3>
                 </div>
                 <ul>
                 	<li class="login_name">
