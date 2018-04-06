@@ -236,7 +236,7 @@ class SiteController extends FormerController
         }
 
         //查询出改商店的一些详细信息
-        $shopData = Shops::model()->findByPk($shop_id);
+        $shopData = Shops::model()->with("image")->findByPk($shop_id);
         if(!$shopData)
         {
             $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在'));
@@ -250,10 +250,11 @@ class SiteController extends FormerController
         }
 
 
-
+        $shopData['logo'] = $shopData['logo']?Yii::app()->params['img_url'] . $shopData->image->filepath . $shopData->image->filename:'';
         $resData=array(
             'shop' 		=> $shopData,
         );
+
         $this->output(array('success'=>1,'data'=>$resData,'msg'=>'获取饭店信息成功'));
     }
 
