@@ -14,6 +14,7 @@
  * @property string $tel
  * @property string $linkman
  * @property integer $order_id
+ * @property integer useid
  */
 class Shops extends CActiveRecord
 {
@@ -98,6 +99,7 @@ class Shops extends CActiveRecord
 		$criteria->compare('linkman',$this->linkman,true);
 		$criteria->compare('order_id',$this->order_id);
 		$criteria->compare('url',$this->url);
+		// $criteria->compare('useid',$this->useid);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,

@@ -10,6 +10,29 @@ $(function(){
 			window.location.href = url;
 		}
 	})
+
+    $('.remove_row_ajax').click(function(){
+        if(confirm('你确定要删除吗？'))
+        {
+            var url = $(this).attr('_href');
+            $.ajax({
+                type:'GET',
+                url:url,
+                dataType: "json",
+                success:function(data){
+                    if(data.errorCode)
+                    {
+                        alert(data.errorText);
+                    }
+                    else if(data.success)
+                    {
+                        alert(data.msg);
+                        window.location.reload();
+                    }
+                }
+            })
+        }
+    })
 	
 	//审核
 	$('.status_row').click(function(){

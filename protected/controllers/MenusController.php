@@ -19,7 +19,7 @@ class MenusController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update','audit','delete'),
+				'actions'=>array('create','update','audit','delete','createAjax','updateAjax','deleteAjax'),
 				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
@@ -63,6 +63,41 @@ class MenusController extends Controller
 		}
 	}
 
+    //创建ajax
+    public function actionCreateAjax()
+    {
+        $model=new Menus;
+        //处理图片
+        if($_FILES['index_pic'] && !$_FILES['index_pic']['error'])
+        {
+            $imgInfo = Yii::app()->material->upload('index_pic');
+            if($imgInfo)
+            {
+                $_POST['Menus']['index_pic'] = $imgInfo['id'];
+            }
+        }
+
+        if(isset($_POST['Menus']))
+        {
+            $model->attributes=$_POST['Menus'];
+            $model->create_time = time();
+            if($model->save())
+            {
+                $model->order_id = $model->id;
+                $model->save();
+                $this->output(array('success' => 1,'msg' => '创建成功'));
+            }
+            else
+            {
+                $this->errorOutput(array('errorCode' => 1,'errorText' => '参数错误'));
+            }
+        }
+        else
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '没有参数'));
+        }
+    }
+
 	//更新
 	public function actionUpdate()
 	{
@@ -100,6 +135,45 @@ class MenusController extends Controller
 			throw new CHttpException(404,'no post param');
 		}
 	}
+
+    //更新ajax
+    public function actionUpdateAjax()
+    {
+        $id = Yii::app()->request->getParam('id');
+        if(!isset($id))
+        {
+            throw new CHttpException(404,'param id is not exists');
+        }
+
+        //处理图片
+        if($_FILES['index_pic'] && !$_FILES['index_pic']['error'])
+        {
+            $imgInfo = Yii::app()->material->upload('index_pic');
+            if($imgInfo)
+            {
+                $_POST['Menus']['index_pic'] = $imgInfo['id'];
+            }
+        }
+
+        $model=$this->loadModel($id);
+        if(isset($_POST['Menus']))
+        {
+            $model->attributes=$_POST['Menus'];
+            if($model->save())
+            {
+                $this->output(array('success' => 1,'msg' => '保存成功'));
+            }
+            else
+            {
+                $this->errorOutput(array('errorCode' => 1,'errorText' => '参数错误'));
+            }
+        }
+        else
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '参数错误'));
+
+        }
+    }
 	
 	//表单页
 	public function actionForm()
@@ -134,6 +208,18 @@ class MenusController extends Controller
 		$this->loadModel($id)->delete();
 		$this->redirect(Yii::app()->createUrl('menus/index'));
 	}
+    //删除ajax
+    public function actionDeleteAjax()
+    {
+        $id = Yii::app()->request->getParam('id');
+        if(!$id)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '没有id'));
+        }
+
+        $this->loadModel($id)->delete();
+        $this->output(array('success' => 1,'msg' => '删除成功'));
+    }
 	
 	//审核
 	public function actionAudit()

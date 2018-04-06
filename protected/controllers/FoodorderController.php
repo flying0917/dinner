@@ -19,8 +19,8 @@ class FoodOrderController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('audit','delete','deductmoney','cancelorder','todayorder','onekey'),
-				'users'=>array('@'),
+				'actions'=>array('audit','DeleteAjax','delete','deductmoney','cancelorder','todayorder','onekey'),
+				'users'=>array('*'),
 			),
 			array('deny',  // deny all users
 				'users'=>array('*'),
@@ -51,17 +51,30 @@ class FoodOrderController extends Controller
 		));
 	}
 
-	//删除
-	public function actionDelete()
+    //删除
+    public function actionDelete()
+    {
+        $id = Yii::app()->request->getParam('id');
+        if(!$id)
+        {
+            throw new CHttpException(404,Yii::t('没有id'));
+        }
+
+        $this->loadModel($id)->delete();
+        $this->redirect(array('index'));
+    }
+
+	//删除ajax
+	public function actionDeleteAjax()
 	{
 		$id = Yii::app()->request->getParam('id');
 		if(!$id)
 		{
-			throw new CHttpException(404,Yii::t('没有id'));
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '没有id'));
 		}
 		
 		$this->loadModel($id)->delete();
-		$this->redirect(array('index'));
+        $this->output(array('success' => 1,'msg' => '删除成功'));
 	}
 
 	//列表
@@ -97,8 +110,8 @@ class FoodOrderController extends Controller
 	//扣钱操作
 	public function actionDeductMoney()
 	{
-		if(Yii::app()->request->isAjaxRequest)
-		{
+
+
 			$food_order_id = Yii::app()->request->getParam('id');
 			if(!$food_order_id)
 			{
@@ -112,7 +125,7 @@ class FoodOrderController extends Controller
 			}
 			else if($orderInfo->status != 1)
 			{
-				$this->errorOutput(array('errorCode' => 1,'errorText' => '该订单不能付款'));
+				$this->errorOutput(array('errorCode' => 1,'errorText' => '该订单不能接单'));
 			}
 			
 			//查询出该订单里用户的账户余额
@@ -122,13 +135,13 @@ class FoodOrderController extends Controller
 				$this->errorOutput(array('errorCode' => 1,'errorText' => '该订单的用户不存在'));
 			}
 			
-			//判断用户的账户钱够不够扣钱
-			if($member->balance < $orderInfo->total_price)
+			//判断用户的账户钱够不够扣钱-----------跳过付款
+			/*if($member->balance < $orderInfo->total_price)
 			{
 				$this->errorOutput(array('errorCode' => 1,'errorText' => '该用户账户余额不足只有' .$member->balance. '元'));
 			}
 			
-			$member->balance -= $orderInfo->total_price;
+			$member->balance -= $orderInfo->total_price;*/
 			if($member->save())
 			{
 				$orderInfo->status = 2;
@@ -143,7 +156,7 @@ class FoodOrderController extends Controller
 					{
 						//记录扣款记录
 						Yii::app()->record->record($orderInfo->food_user_id,$orderInfo->total_price);
-						$this->output(array('success' => 1,'successText' => '扣款成功'));
+						$this->output(array('success' => 1,'successText' => '接单成功'));
 					}
 					else 
 					{
@@ -160,11 +173,6 @@ class FoodOrderController extends Controller
 			{
 				$this->errorOutput(array('errorCode' => 1,'errorText' => '扣款失败'));
 			}
-		}
-		else 
-		{
-			throw new CHttpException(404,Yii::t('yii','非法操作'));
-		}
 	}
 	
 	//取消订单

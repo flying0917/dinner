@@ -25,10 +25,30 @@ class Controller extends CController
 	protected function beforeAction($action)
 	{
 		//如果未登录跳转到登录页
-		if(!isset(Yii::app()->user->admin_userinfo) && (!defined('NO_LOGIN') || !NO_LOGIN))
+		if(isset(Yii::app()->user->member_userinfo) && Yii::app()->user->member_userinfo['id'])
 		{
-			$this->redirect(Yii::app()->createUrl('user/login'));
-		}
+            // 查询出用户的基本信息
+            $member_id = Yii::app()->user->member_userinfo['id'];
+            $criteria=new CDbCriteria;
+            $criteria->select = 'roleid,name,sex,avatar,email,balance';
+            $criteria->condition = 'id=:id';
+            $criteria->params = array(':id' => $member_id);
+            $memberData = Members::model()->find($criteria);
+            $memberData = CJSON::decode(CJSON::encode($memberData));
+            if($memberData["roleid"]==1){
+                // 商家用户
+                // 可以访问
+            } else {
+                // 普通用户
+                $this->redirect(Yii::app()->createUrl('user/login'));
+            }
+		} else {
+		    // 后台用户
+            if(!isset(Yii::app()->user->admin_userinfo) && (!defined('NO_LOGIN') || !NO_LOGIN))
+            {
+                $this->redirect(Yii::app()->createUrl('user/login'));
+            }
+        }
 		return true;
 	}
 	

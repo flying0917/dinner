@@ -1,7 +1,7 @@
 <div class="shadow clearfix" id="pCenter">
     <?php echo $pMenu;?>
 
-    <div id="pAccount">
+                <div id="pAccount">
                     <div id="ac_info" class="acc_con">
                         <p class="ac_title">个人信息</p>
                         <div class="ac_content">

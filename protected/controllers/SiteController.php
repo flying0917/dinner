@@ -223,6 +223,9 @@ class SiteController extends FormerController
 		));
 	}
 
+
+
+
     //进入某个餐厅信息ajax
     public function actionGetShopInfo()
     {
@@ -253,6 +256,123 @@ class SiteController extends FormerController
         );
         $this->output(array('success'=>1,'data'=>$resData,'msg'=>'获取饭店信息成功'));
     }
+
+
+
+
+
+
+
+
+    //菜单页面
+    public function actionMenus()
+    {
+        //创建查询条件
+        $pMenu = $this->getCentermenuView(array());
+        $menuname = Yii::app()->request->getParam('k');
+
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria=new CDbCriteria;
+        $criteria->select = 'roleid,name,sex,avatar,email,balance';
+        $criteria->condition = 'id=:id';
+        $criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($criteria);
+        $memberData = CJSON::decode(CJSON::encode($memberData));
+        $shopdata = array();
+        if($memberData["roleid"]==1){
+            //商家用户
+            $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+            $shopdata = CJSON::decode(CJSON::encode($shopdata));
+        }
+
+        $shopId = $shopdata['id'];
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.order_id DESC';
+        if($menuname)
+        {
+            $criteria->compare('t.name',$menuname,true);
+        }
+
+        if($shopId)
+        {
+            $criteria->compare('t.shop_id',$shopId);
+        }
+        $count=Menus::model()->count($criteria);
+        //构建分页
+        $pages = new CPagination($count);
+        $pages->pageSize = Yii::app()->params['pagesize'];
+        $pages->applyLimit($criteria);
+        $model = Menus::model()->with('food_sort','image','shops')->findAll($criteria);
+        $data = array();
+        foreach($model AS $k => $v)
+        {
+            $data[$k] = $v->attributes;
+            $data[$k]['index_pic'] = $v->index_pic?Yii::app()->params['img_url'] . $v->image->filepath . $v->image->filename:'';
+            $data[$k]['sort_name'] = $v->food_sort->name;
+            $data[$k]['shop_name'] = $v->shops->name;
+            $data[$k]['create_time'] = Yii::app()->format->formatDate($v->create_time);
+            $data[$k]['status_text'] = Yii::app()->params['menu_status'][$v->status];
+            $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+            $data[$k]['price'] = $v->price . '元/份';
+        }
+
+
+
+        //取出所有店家供前端选择
+        $shops = Shops::model()->findAll();
+        $shops = CJSON::decode(CJSON::encode($shops));
+        //输出到前端
+        $this->render('menus', array(
+            'data' 	=> $data,
+            'shops' => $shops,
+            'pages'	=> $pages,
+            'pMenu'=>$pMenu
+        ));
+    }
+    //菜单表单页
+    public function actionMenusForm()
+    {
+        $id = Yii::app()->request->getParam('id');
+        if($id)
+        {
+            $model = Menus::model()->with('food_sort','image')->findByPk($id);
+            $data = CJSON::decode(CJSON::encode($model));
+            $data['index_pic'] = $data['index_pic']?Yii::app()->params['img_url'] . $model->image->filepath . $model->image->filename:'';
+        }
+
+        //查询出商家的信息
+        $shops = Shops::model()->findAll();
+        $shops = CJSON::decode(CJSON::encode($shops));
+
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria=new CDbCriteria;
+        $criteria->select = 'roleid,name,sex,avatar,email,balance';
+        $criteria->condition = 'id=:id';
+        $criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($criteria);
+        $memberData = CJSON::decode(CJSON::encode($memberData));
+        $shopdata = array();
+        if($memberData["roleid"]==1){
+            //商家用户
+            $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+            $shopdata = CJSON::decode(CJSON::encode($shopdata));
+        }
+        //菜单
+        $pMenu = $this->getCentermenuView(array());
+        $this->render('menus_form',array(
+            'data' 	=> $data,
+            'shops' => $shops,
+            'pMenu'=>$pMenu,
+            'shopData'=>$shopdata
+        ));
+    }
+
+
+
+
+
+
+
 
     //进入某个餐厅获取菜单ajax
     public function actionGetMenu()
@@ -426,13 +546,231 @@ class SiteController extends FormerController
 		//查询出用户的基本信息
 		$member_id = Yii::app()->user->member_userinfo['id'];
 		$criteria=new CDbCriteria;
-		$criteria->select = 'name,sex,avatar,email,balance';
+		$criteria->select = 'roleid,name,sex,avatar,email,balance';
 		$criteria->condition = 'id=:id';
 		$criteria->params = array(':id' => $member_id);
 		$memberData = Members::model()->find($criteria);
 		$memberData = CJSON::decode(CJSON::encode($memberData));
-		$this->render('membercenter',array('member' => $memberData));
+        $pMenu = $this->getCentermenuView( $memberData);
+		if($memberData["roleid"]==1){
+            //商家用户
+		    $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+            $shopdata = CJSON::decode(CJSON::encode($shopdata));
+		    $view='shopcenter';
+            $this->render($view,array('member' => $memberData,'shop'=>$shopdata,'pMenu' => $pMenu));
+        }else{
+		    //普通用户
+            $view='membercenter';
+            $this->render($view,array('member' => $memberData,'pMenu' => $pMenu));
+        }
 	}
+
+
+
+
+    //商家订单页面
+    public function actionFoodorder()
+    {
+        //查询出用户的基本信息
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria=new CDbCriteria;
+        $criteria->select = 'roleid,name,sex,avatar,email,balance';
+        $criteria->condition = 'id=:id';
+        $criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($criteria);
+        $memberData = CJSON::decode(CJSON::encode($memberData));
+
+        $pMenu = $this->getCentermenuView( array());
+
+        if($memberData["roleid"]==0) {
+            //普通用户
+            $this->actionMemberCenter();
+            exit();
+        }
+        //商家用户
+        $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+        $shopdata = CJSON::decode(CJSON::encode($shopdata));
+        //创建查询条件
+        $shop_criteria = new CDbCriteria();
+        $shop_criteria->condition = 'shop_id=:shop_id';
+        $shop_criteria->params = array(':shop_id' =>$shopdata['id']);
+        $shop_criteria->order = 't.create_time DESC';
+        $count = FoodOrder::model()->count($shop_criteria);
+        //构建分页
+        $pages = new CPagination($count);
+        $pages->pageSize = Yii::app()->params['pagesize'];
+        $pages->applyLimit($shop_criteria);
+        $model = FoodOrder::model()->with('shops', 'members')->findAll($shop_criteria);
+        $data = array();
+        foreach ($model AS $k => $v) {
+            $data[$k] = $v->attributes;
+            $data[$k]['shop_name'] = $v->shops->name;
+            $data[$k]['user_name'] = $v->members->name;
+            $data[$k]['create_time'] = date('Y-m-d H:i:s', $v->create_time);
+            $data[$k]['status_text'] = Yii::app()->params['order_status'][$v->status];
+            $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+        }
+
+        //输出到前端
+        $this->render('foodorder', array(
+            'data' => $data,
+            'pages' => $pages,
+            'pMenu'=> $pMenu
+        ));
+    }
+    //商家表单页
+    public function actionFoodOrderForm()
+    {
+        $id = Yii::app()->request->getParam('id');
+        if($id)
+        {
+            $model = FoodOrder::model()->with('shops','members')->findByPk($id);
+            $data = CJSON::decode(CJSON::encode($model));
+            $data['product_info'] = $data['product_info']?unserialize($data['product_info']):array();
+            $data['user_name'] = $model->members->name;
+            $data['shop_name'] = $model->shops->name;
+            $data['create_time'] = date('Y-m-d H:i:s',$model->create_time);
+
+            //菜单
+            $pMenu= $pMenu = $this->getCentermenuView( array());
+        }
+        else
+        {
+            throw new CHttpException(404,Yii::t('yii','没有id'));
+        }
+
+        $this->render('order_form',array(
+            'data' 	=> $data,
+            'pMenu'=>$pMenu
+        ));
+    }
+    //商家订单统计
+    public function actionTodayOrder()
+    {
+        //创建查询条件
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.create_time DESC';//按时间倒序排
+
+        //如果没有指定日期，默认查询当天的订单统计
+        $date = Yii::app()->request->getParam('date');
+        if($date)
+        {
+            $today = strtotime(date($date));
+            if(!$today)
+            {
+                throw new CHttpException(404,'日期格式设置有误');
+            }
+            else if($today > time())
+            {
+                throw new CHttpException(404,'设置的日期不能超过今天');
+            }
+            $tomorrow = $today + 24*3600;
+        }
+        else
+        {
+            $today = strtotime(date('Y-m-d'));
+            $tomorrow = strtotime(date('Y-m-d',time()+24*3600));
+        }
+
+        $criteria->condition = '(t.status = :status1 OR t.status = :status2) AND t.create_time > :today AND t.create_time < :tomorrow';
+        $criteria->params = array(':status1' => 1,':status2' => 2,':today' => $today,':tomorrow' => $tomorrow);
+        $model = FoodOrder::model()->with('shops','members')->findAll($criteria);
+        $data = array();
+        $_total_price = 0;
+        $tongji = array();
+        foreach($model AS $k => $v)
+        {
+            $_total_price += $v->total_price;
+            $data[$k] = $v->attributes;
+            $data[$k]['product_info'] = unserialize($v->product_info);
+            $data[$k]['shop_name'] = $v->shops->name;
+            $data[$k]['user_name'] = $v->members->name;
+            $data[$k]['create_time'] = date('Y-m-d H:i:s',$v->create_time);
+            $data[$k]['status_text'] = Yii::app()->params['order_status'][$v->status];
+            $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+            //统计
+            $tongji[$v->shop_id]['name'] = $v->shops->name . '(' . $v->shops->tel . ')';
+            $tongji[$v->shop_id]['product'][] = unserialize($v->product_info);
+        }
+
+        //统计结果
+        $result = array();
+        foreach ($tongji AS $k => $v)
+        {
+            $result[$k]['name'] = $v['name'];
+            $shop_total_price = 0;
+            foreach($v['product'] AS $_k => $_v)
+            {
+                foreach ($_v AS $kk => $vv)
+                {
+                    $shop_total_price += $vv['smallTotal'];
+                    $result[$k]['product'][$vv['Id']]['name'] = $vv['Name'];
+                    if($result[$k]['product'][$vv['Id']]['count'])
+                    {
+                        $result[$k]['product'][$vv['Id']]['count'] += $vv['Count'];
+                    }
+                    else
+                    {
+                        $result[$k]['product'][$vv['Id']]['count'] = $vv['Count'];
+                    }
+
+                    if($result[$k]['product'][$vv['Id']]['smallTotal'])
+                    {
+                        $result[$k]['product'][$vv['Id']]['smallTotal'] += $vv['smallTotal'];
+                    }
+                    else
+                    {
+                        $result[$k]['product'][$vv['Id']]['smallTotal'] = $vv['smallTotal'];
+                    }
+                }
+            }
+            $result[$k]['shop_total_price'] = $shop_total_price;
+        }
+
+        //菜单
+        $pMenu= $pMenu = $this->getCentermenuView( array());
+
+        //输出到前端
+        $this->render('today_order', array(
+            'data' 	=> $data,
+            'statistics' => $result,
+            'total_price' => $_total_price,
+            'date' => $date,
+            'pMenu'=>$pMenu
+        ));
+    }
+
+
+
+
+
+
+
+
+
+    /**
+     * 显示公共部分
+     * @return string
+     */
+    protected function getCentermenuView( $params) {
+        // 查询出用户的基本信息
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria=new CDbCriteria;
+        $criteria->select = 'roleid,name,sex,avatar,email,balance';
+        $criteria->condition = 'id=:id';
+        $criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($criteria);
+        $memberData = CJSON::decode(CJSON::encode($memberData));
+        $shopdata = array();
+        if($memberData["roleid"]==1){
+            //商家用户
+            $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+            $shopdata = CJSON::decode(CJSON::encode($shopdata));
+        }
+        $params['shopdata'] = $shopdata;
+        $params['memberData'] = $memberData;
+        return $this->renderPartial('centermenu', $params, true);
+    }
 
 
     //获取用户数据通过ajax
@@ -455,6 +793,7 @@ class SiteController extends FormerController
             $this->errorOutput(array('error' => 1,'msg'=>'获取用户信息失败'));
         }
     }
+
     //通过id查询用户订单信息ajax
     public function actionMyOrderAjax()
     {
@@ -593,7 +932,9 @@ class SiteController extends FormerController
 		$criteria->select = '*';
 		$criteria->condition = 'food_user_id=:food_user_id';
 		$criteria->params = array(':food_user_id' => $member_id);
-		
+
+        //菜单
+        $pMenu= $pMenu = $this->getCentermenuView( array());
 		//构建分页
 		$count=FoodOrder::model()->count($criteria);
 		$pages = new CPagination($count);
@@ -638,7 +979,7 @@ class SiteController extends FormerController
 			$orderData[$k]['status_log'] = $status_log;
 		}
 		$cur_title = $is_today?'今日订单':'历史订单';
-		$this->render('myorder',array('order' => $orderData,'cur_title' => $cur_title,'pages' => $pages));
+		$this->render('myorder',array('order' => $orderData,'cur_title' => $cur_title,'pages' => $pages,'pMenu'=> $pMenu));
 	}
 	
 	//前台会员登陆界面
@@ -763,7 +1104,8 @@ class SiteController extends FormerController
 	//修改密码页面
 	public function actionmodifyPassword()
 	{
-		$this->render('modifypassword');
+	    $pMenu= $pMenu = $this->getCentermenuView( array());
+		$this->render('modifypassword',array("pMenu"=>$pMenu));
 	}
 	
 	//确认修改
@@ -823,11 +1165,12 @@ class SiteController extends FormerController
 		//查询出公告数据
 		$notice = Announcement::model()->findAll(array('order' => 'create_time DESC','condition' => 'status=:status','params'=>array(':status'=>2)));
 		$notice = CJSON::decode(CJSON::encode($notice));
+        $pMenu = $this->getCentermenuView( array());
 		foreach($notice AS $k => $v)
 		{
 			$notice[$k]['create_time'] = date('Y-m-d',$v['create_time']);
 		}
-		$this->render('systemnotice',array('announce' => $notice));
+		$this->render('systemnotice',array('announce' => $notice,'pMenu' => $pMenu));
 	}
 	
 	//用户取消订单
