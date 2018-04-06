@@ -7,7 +7,7 @@ class SiteController extends FormerController
 	public function filters()
 	{
 		return array(
-			'checkLoginControl + confirmorder,orderok,membercenter,myorder,modifypassword,domodify,systemnotice,cancelorder,seeconsume',//检测是否登录
+			'checkLoginControl + confirmorder,orderok,membercenter,myorder,modifypassword,domodify,systemnotice,cancelorder,seeconsume,menus,menusForm,foodorder,foodOrderForm,todayOrder',//检测是否登录
 			'checkIsCartEmpty + lookcart,confirmorder',//检测购物车是否为空
 			/*'checkReqiest + doregister,domodify,submitmessage,replymessage',//判断是不是ajax请求*/
 			'checkIsOnTime +lookmenu,lookcart,confirmorder',//判断是否在订餐时间内

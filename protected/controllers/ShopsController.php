@@ -183,6 +183,7 @@ class ShopsController extends Controller
 		$data = array();
 		foreach($model AS $k => $v)
 		{
+
 			$data[$k] = $v->attributes;
 			$data[$k]['logo'] = $v->logo?Yii::app()->params['img_url'] . $v->image->filepath . $v->image->filename:'';
 			$data[$k]['create_time'] = Yii::app()->format->formatDate($v->create_time);

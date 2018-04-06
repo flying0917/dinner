@@ -185,7 +185,7 @@ return array(
 		),
 		'homeIndexPic' => 'home.jpg',
 		'material_path' => 'application.uploads',
-		'img_url' => 'http://localhost/dinner/protected/uploads/',
+		'img_url' => 'http://104.129.182.213/dinner/protected/uploads/',
 		'pagesize' => 10,//配置后台分页显示的个数
 		'menu' => array(
 						   	array(
