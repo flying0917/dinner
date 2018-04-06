@@ -272,11 +272,11 @@ class SiteController extends FormerController
         $menuname = Yii::app()->request->getParam('k');
 
         $member_id = Yii::app()->user->member_userinfo['id'];
-        $criteria=new CDbCriteria;
-        $criteria->select = 'roleid,name,sex,avatar,email,balance';
-        $criteria->condition = 'id=:id';
-        $criteria->params = array(':id' => $member_id);
-        $memberData = Members::model()->find($criteria);
+        $s_criteria=new CDbCriteria;
+        $s_criteria->select = 'roleid,name,sex,avatar,email,balance';
+        $s_criteria->condition = 'id=:id';
+        $s_criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($s_criteria);
         $memberData = CJSON::decode(CJSON::encode($memberData));
         $shopdata = array();
         if($memberData["roleid"]==1){
@@ -287,6 +287,8 @@ class SiteController extends FormerController
 
         $shopId = $shopdata['id'];
         $criteria = new CDbCriteria();
+        $criteria->condition = 'shop_id=:shop_id';
+        $criteria->params = array(':shop_id' => $shopId);
         $criteria->order = 't.order_id DESC';
         if($menuname)
         {
