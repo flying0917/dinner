@@ -67,15 +67,19 @@ $(function(){
         color:#EB781F !important;
         border-bottom:1px solid #EB781F !important;
     }
+    .hidden
+    {
+        display:none;
+    }
 </style>
 
-<div class="login shadow" style="padding-bottom: 20px;">
+<div class="login shadow clearfix" style="padding-bottom: 20px;">
 
                 <div class="login-title">
-                    <h3 class="active">普通用户注册</h3>
-                    <h3>商家用户注册</h3>
+                    <h3 data-target="user" class="active">普通用户注册</h3>
+                    <h3 data-target="shop">商家用户注册</h3>
                 </div>
-                <ul>
+                <ul class="login-content" id="user">
                 	<li class="login_name">
                         <label>姓名：</label>
                         <input name="name" type="text" maxlength="20" id="NickName">
@@ -100,7 +104,76 @@ $(function(){
                         <input type="hidden" id="login_url" value="<?php echo Yii::app()->createUrl('site/login');?>">
                     </li>
                 </ul>
+                <ul class="login-content hidden" id="shop">
+                    <li class="login_name">
+                        <label>姓名：</label>
+                        <input name="name" type="text" maxlength="20" id="NickName">
+                        <p class="logTips" id="name_tip" style="display: none;"></p>
+                    </li>
+                    <li class="login_password">
+                        <label>密码：</label>
+                        <input name="password1" type="password" maxlength="15" id="PassWord1">
+                        <p class="logTips"  id="ps1_tip"  style="display: none;"></p>
+                    </li>
+                    <li class="sure_password">
+                        <label>
+                            确认密码：</label>
+                        <input name="password2" type="password" maxlength="15" id="PassWord2">
+                        <p class="logTips" id="ps2_tip" style="display: none;"></p>
+                    </li>
+
+
+
+                    <li>
+                        <label>名称</label>
+                        <input class="text-input small-input" type="text"  name="Shops[name]" value=""/>
+                    </li>
+                    <li>
+                        <label>logo</label>
+                        <input class="text-input small-input" type="file"  name="logo" />
+                    </li>
+                    <li>
+                        <img src="<?php echo CHtml::encode($data['logo']);?>" width="160" hieght="120" />
+                    </li>
+                    <li>
+                        <label>地址</label>
+                        <input class="text-input small-input" type="text" name="Shops[address]" value="" />
+                    </li>
+                    <li>
+                        <label>电话</label>
+                        <input class="text-input small-input" type="text" name="Shops[tel]" value=""/>
+                    </li>
+                    <li>
+                        <label>联系人</label>
+                        <input class="text-input small-input" type="text" name="Shops[linkman]" value=""/>
+                    </li>
+                    <li>
+                        <label>商家网站链接</label>
+                        <input class="text-input small-input" type="text" name="Shops[url]" value=""/>
+                    </li>
+
+
+                    <li class="regist_btn">
+                        <input type="submit" name="RegistIn" value="注册" id="RegistIn">
+                        <span id="regist_result"></span>
+                        <input type="hidden" id="submit_url" value="<?php echo Yii::app()->createUrl('site/doregister');?>">
+                        <input type="hidden" id="login_url" value="<?php echo Yii::app()->createUrl('site/login');?>">
+                    </li>
+                </ul>
                 <div class="member">
                     <span>已有开吃吧帐号？</span> <a href="<?php echo Yii::app()->createUrl('site/login')?>">请登录</a>
                 </div>
 </div>
+<script>
+    $(function()
+    {
+        $(".login .login-title h3").click(function()
+        {
+            var targetId=$(this).attr("data-target");
+            $(".login .login-title h3").removeClass("active");
+            $(this).addClass("active");
+            $(".login-content").addClass("hidden");
+            $("#"+targetId).removeClass("hidden");
+        });
+    });
+</script>

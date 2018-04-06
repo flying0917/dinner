@@ -465,3 +465,12 @@ r li p:first-child span{float:right;}
 		{
 
 		}
+
+.clearfix:before,
+.clearfix:after {
+	content: " ";
+	display: table;
+}
+.clearfix:after {
+	clear: both;
+}
