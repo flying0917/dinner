@@ -239,7 +239,7 @@ class SiteController extends FormerController
         $shopData= Shops::model()->with("image")->findByPk($shop_id);
 
         $shopData['logo'] = $shopData['logo']?Yii::app()->params['img_url'] . $shopData["image"]->filepath . $shopData["image"]->filename:'';
-        print_r($shopData);
+
         if(!$shopData)
         {
             $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在'));
