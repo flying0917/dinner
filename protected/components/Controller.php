@@ -67,13 +67,13 @@ class Controller extends CController
 	//输出错误信息
 	protected function output($data = array())
 	{
-        if(Yii::app()->user->isGuest)
+        if(isset(Yii::app()->user->member_userinfo))
         {
-            $data["isGuest"]=true;
+            $data["isGuest"]=false;
         }
         else
         {
-            $data["isGuest"]=false;
+            $data["isGuest"]=true;
         }
 		echo json_encode($data);
 		exit();
@@ -82,13 +82,13 @@ class Controller extends CController
 	//输出错误信息
 	protected function errorOutput($data = array())
 	{
-        if(Yii::app()->user->isGuest)
+        if(isset(Yii::app()->user->member_userinfo))
         {
-            $data["isGuest"]=true;
+            $data["isGuest"]=false;
         }
         else
         {
-            $data["isGuest"]=false;
+            $data["isGuest"]=true;
         }
 		echo json_encode($data);
 		exit();
