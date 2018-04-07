@@ -15,6 +15,7 @@
  * @property string $linkman
  * @property integer $order_id
  * @property integer $useid
+ * @property integer $status
  */
 class Shops extends CActiveRecord
 {

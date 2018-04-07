@@ -1167,6 +1167,8 @@ class SiteController extends FormerController
                     $shopData['useid']=$user_id;
                     $model->attributes=$shopData;
                     $model->useid = $user_id;
+                    //跳过审核
+                    $model->status = 2;
                     $model->create_time = time();
                     $model->update_time = time();
                     if($model->save())
