@@ -886,7 +886,7 @@ class SiteController extends FormerController
         $pages->applyLimit($criteria);
         //按条件获取数据
 
-        $model = FoodOrder::model()->with('shops','food_log','image')->findAll($criteria);
+        $model = FoodOrder::model()->with('shops','food_log')->findAll($criteria);
         $orderData = array();
         foreach ($model AS $k => $v)
         {
@@ -909,7 +909,9 @@ class SiteController extends FormerController
 
             $orderData[$k] = $v->attributes;
             $orderData[$k]['shop_name'] = $v->shops->name;
-            $orderData[$k]['shop_logo'] = $v->shops->logo?Yii::app()->params['img_url'] . $v->image->filepath . $v->image->filename:'';
+            $orderData[$k]['shop_id'] = $v->shops->id;
+            $shopLogo = Shops::model()->with('image')->find('id=:id',array(':id'=>$orderData[$k]['shop_id']));
+            $orderData[$k]['shop_logo'] = $v->shops->logo?Yii::app()->params['img_url'] .$shopLogo->image->filepath .$shopLogo->image->filename:'';
             $orderData[$k]['product_info'] = unserialize($v->product_info);
             //添加总个数和总价信息
             $orderData[$k]["total"]=0;
