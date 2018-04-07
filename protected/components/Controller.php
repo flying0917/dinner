@@ -40,7 +40,15 @@ class Controller extends CController
                 // 可以访问
             } else {
                 // 普通用户
-                $this->redirect(Yii::app()->createUrl('user/login'));
+                if(!Yii::app()->request->isAjaxRequest)
+                {
+                    $this->redirect(Yii::app()->createUrl('user/login'));
+                }
+                else
+                {
+
+                    $this->errorOutput(array('errorCode' => 1,'errorText' => '未登录'));
+                }
             }
 		} else {
 		    // 后台用户
