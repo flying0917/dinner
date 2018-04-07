@@ -849,6 +849,8 @@ class SiteController extends FormerController
         }
         $orderData["shop_name"] = $orderDatas->shops->name;
         $orderData["shop_id"] = $orderDatas->shops->id;
+        $shopLogo=Material::model()->findByPk($orderData['shop_id']);
+        $orderData['shop_logo'] = $orderDatas->shops->logo?Yii::app()->params['img_url'] .$shopLogo->filepath .$shopLogo->filename:'';
         $orderData["address"] = $orderDatas->address;
         $orderData["create_order_date"] = date('Y-m-d',$orderDatas->create_time);
         $orderData["create_time"] = date('H:i:s',$orderDatas->create_time);
