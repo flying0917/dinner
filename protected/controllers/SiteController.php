@@ -2,6 +2,11 @@
 //前端页面控制器
 class SiteController extends FormerController
 {
+    /**
+     * @inheritdoc
+     */
+    public $dish;
+
 	private $order;//购物车里面的订单数据
 	//控制几个页面的访问
 	public function filters()
@@ -19,7 +24,15 @@ class SiteController extends FormerController
 	{
 		if(!isset(Yii::app()->user->member_userinfo))
 		{
-			$this->redirect(Yii::app()->createUrl('site/login'));
+            if(!Yii::app()->request->isAjaxRequest)
+            {
+                $this->redirect(Yii::app()->createUrl('user/login'));
+            }
+            else
+            {
+
+                $this->errorOutput(array('errorCode' => 1,'errorText' => '未登录'));
+            }
 		}
 		$filterChain->run();
 	}

@@ -4,7 +4,21 @@
 class FormerController extends CController
 {
 	public $layout='//layouts/site';
-	
+
+    public function init(){
+        parent::init();
+
+        if(!Yii::app()->request->isAjaxRequest)
+        {
+            $this->redirect(Yii::app()->createUrl('user/login'));
+        }
+        else
+        {
+
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '未登录'));
+        }
+    }
+
 	//输出错误信息
 	protected function errorOutput($data = array())
 	{
