@@ -2,10 +2,6 @@
 //前端页面控制器
 class SiteController extends FormerController
 {
-    /**
-     * @inheritdoc
-     */
-    public $dish;
 
 	private $order;//购物车里面的订单数据
 	//控制几个页面的访问
@@ -26,7 +22,7 @@ class SiteController extends FormerController
 		{
             if(!Yii::app()->request->isAjaxRequest)
             {
-                $this->redirect(Yii::app()->createUrl('user/login'));
+                $this->redirect(Yii::app()->createUrl('site/login'));
             }
             else
             {
