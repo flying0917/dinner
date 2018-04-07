@@ -210,7 +210,7 @@ class SiteController extends FormerController
 				{
 					$message[$k]['replys'][$kk] = $vv->attributes;
 					$message[$k]['replys'][$kk]['create_time'] 	= date('Y-m-d H:i:s',$vv->create_time);
-					$message[$k]['replys'][$kk]['user_name'] 	= ($vv->user_id == -1)?'前台妹子说':$vv->members->name;
+					$message[$k]['replys'][$kk]['user_name'] 	= ($vv->user_id == -1)?'商家说':$vv->members->name;
 				}
 			}
 		}
@@ -1205,6 +1205,44 @@ class SiteController extends FormerController
 		}
 		$this->redirect(array('site/login'));
 	}
+
+
+	//评论
+    public function actionMessage()
+    {
+        //创建查询条件
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.order_id DESC';
+        $count=Message::model()->count($criteria);
+        //构建分页
+        $pages = new CPagination($count);
+        $pages->pageSize = Yii::app()->params['pagesize'];
+        $pages->applyLimit($criteria);
+
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+
+        $criteria->condition="shop_id=:shop_id";
+        $criteria->params=array(':shop_id' =>$shopdata->id);
+        $model = Message::model()->with('members','shops')->findAll($criteria);
+        $data = array();
+        foreach($model AS $k => $v)
+        {
+            $data[$k] = $v->attributes;
+            $data[$k]['shop_name'] = $v->shops->name;
+            $data[$k]['user_name'] = $v->members->name;
+            $data[$k]['create_time'] = Yii::app()->format->formatDate($v->create_time);
+            $data[$k]['status_text'] = Yii::app()->params['message_status'][$v->status];
+            $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+        }
+        $pMenu= $pMenu = $this->getCentermenuView(array());
+        //输出到前端
+        $this->render('message', array(
+            'data' 	=> $data,
+            'pages'	=> $pages,
+            'pMenu'=>$pMenu
+        ));
+    }
 	
 	//修改密码页面
 	public function actionmodifyPassword()

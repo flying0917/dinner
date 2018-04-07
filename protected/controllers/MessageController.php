@@ -19,7 +19,7 @@ class MessageController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update','audit','delete','replymsg'),
+				'actions'=>array('create','update','audit','delete','replymsg','deleteAjax'),
 				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
@@ -40,6 +40,18 @@ class MessageController extends Controller
 		$this->loadModel($id)->delete();
 		$this->redirect(Yii::app()->createUrl('message/index'));
 	}
+    //删除ajax
+    public function actionDeleteAjax($id)
+    {
+        $id = Yii::app()->request->getParam('id');
+        if(!$id)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '没有id'));
+        }
+
+        $this->loadModel($id)->delete();
+        $this->output(array('success' => 1,'msg' => '删除成功'));
+    }
 	
 	//回复消息
 	public function actionReplyMsg()

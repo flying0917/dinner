@@ -35,6 +35,13 @@ Yii::app()->clientScript->registerCssFile(Yii::app()->baseUrl . "/assets/css/inv
                 <dd><a href="<?php echo Yii::app()->createUrl('site/menus',array('shop_id' => $shopdata['id']));?>" class="n2">菜单管理</a></dd>
             </dl>
         </div>
+
+        <div class="border">
+            <dl>
+                <dt>评论中心</dt>
+                <dd><a href="<?php echo Yii::app()->createUrl('site/message',array('shop_id' => $shopdata['id']));?>" class="n2">留言管理</a></dd>
+            </dl>
+        </div>
         <div class="border">
             <dl>
                 <dt>信息中心</dt>
