@@ -16,6 +16,7 @@
  * @property integer $create_time
  * @property integer $update_time
  * @property string $ip
+ * @property integer $roleid
  */
 class Members extends CActiveRecord
 {
@@ -68,7 +69,7 @@ class Members extends CActiveRecord
 			'status' => 'Status',
 			'create_time' => 'Create Time',
 			'update_time' => 'Update Time',
-			'ip' => 'Ip',
+			'ip' => 'Ip'
 		);
 	}
 

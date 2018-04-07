@@ -64,6 +64,7 @@ class ShopsController extends Controller
 		}
 	}
 
+
 	//更新店铺
 	public function actionUpdate()
 	{

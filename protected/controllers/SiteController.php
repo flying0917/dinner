@@ -1094,6 +1094,105 @@ class SiteController extends FormerController
 			$this->errorOutput(array('errorCode' => 1,'errorText' => '注册失败'));
 		}
 	}
+    //前端注册店铺和商家账号
+    public function actionShopRegisterAjax()
+    {
+        //商家账号注册
+        $name = $_POST['name'];
+        $password1 = $_POST['password1'];
+        $password2 =$_POST['password2'];
+
+        if(!$name)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '姓名不能为空'));
+        }
+        else if(strlen($name) > 15)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '姓名太长不能超过15个字符'));
+        }
+
+        if(!$password1 || !$password2)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '密码不能为空'));
+        }
+        else if(strlen($password1) > 15 || strlen($password2) > 15)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '两次密码不能超过15个字符'));
+        }
+        else if($password1 !== $password2)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '两次密码不相符'));
+        }
+
+        //判断该用户是不是已经存在了
+        $_member = Members::model()->find('name=:name',array(':name' => $name));
+        if($_member)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '该用户已经存在'));
+        }
+
+        //随机长生一个干扰码
+        $salt = Common::getGenerateSalt();
+        $memberModel = new Members();
+        $memberModel->name = $name;
+        $memberModel->salt = $salt;
+        $memberModel->roleid=1;
+        $memberModel->password = md5($salt . $password1);
+        $memberModel->create_time = time();
+        $memberModel->update_time = time();
+
+        if($memberModel->save())
+        {
+            $memberModel->order_id = $memberModel->id;
+            $user_id= $memberModel->id;
+            $memberModel->save();
+            //创建商铺
+            $model=new Shops();
+            //处理图片
+            if($_FILES['logo'] && !$_FILES['logo']['error'])
+            {
+                $imgInfo = Yii::app()->material->upload('logo');
+                if($imgInfo)
+                {
+                    $_POST['Shops']['logo'] = $imgInfo['id'];
+                }
+            }
+            if(isset($user_id))
+            {
+                if(isset($_POST['Shops']))
+                {
+                    $shopData=array();
+
+                    $shopData=$_POST['Shops'];
+                    $shopData['useid']=$user_id;
+                    $model->attributes=$shopData;
+                    $model->useid = $user_id;
+                    $model->create_time = time();
+                    $model->update_time = time();
+                    if($model->save())
+                    {
+                        $model->order_id = $model->id;
+                        $model->save();
+                        $this->output(array('success' => 1,'successText' => '注册成功'));
+                    }
+                    else
+                    {
+                        throw new CHttpException(404,'创建失败');
+                    }
+                }
+                else
+                {
+                    throw new CHttpException(404,'no post param');
+                }
+            }
+
+        }
+        else
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '注册失败'));
+        }
+
+    }
 	
 	//会员退出
 	public function actionLogout()
