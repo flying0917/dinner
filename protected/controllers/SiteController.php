@@ -910,8 +910,8 @@ class SiteController extends FormerController
             $orderData[$k] = $v->attributes;
             $orderData[$k]['shop_name'] = $v->shops->name;
             $orderData[$k]['shop_id'] = $v->shops->id;
-            $shopLogo = Shops::model()->with('image')->find('id=:id',array(':id'=>$orderData[$k]['shop_id']));
-            $orderData[$k]['shop_logo'] = $v->shops->logo?Yii::app()->params['img_url'] .$shopLogo->image->filepath .$shopLogo->image->filename:'';
+            $shopLogo=Material::model()->findByPk($orderData[$k]['shop_id']);
+            $orderData[$k]['shop_logo'] = $v->shops->logo?Yii::app()->params['img_url'] .$shopLogo->filepath .$shopLogo->filename:'';
             $orderData[$k]['product_info'] = unserialize($v->product_info);
             //添加总个数和总价信息
             $orderData[$k]["total"]=0;
