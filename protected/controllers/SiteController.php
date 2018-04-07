@@ -1205,6 +1205,19 @@ class SiteController extends FormerController
 		}
 		$this->redirect(array('site/login'));
 	}
+    //会员退出ajax
+    public function actionLogoutAjax()
+    {
+        if(isset(Yii::app()->user->member_userinfo))
+        {
+            unset(Yii::app()->user->member_userinfo);
+            $this->output(array('success'=>1,'msg'=>'退出登录成功'));
+        }
+        else
+        {
+            $this->errorOutput(array('errorCode'=>1,'errorText'=>'退出登录成功'));
+        }
+    }
 
 
 	//评论
