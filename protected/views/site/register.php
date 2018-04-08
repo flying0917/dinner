@@ -5,6 +5,7 @@ $(function(){
 		var name = $('#NickName').val();
 		var password1 = $('#PassWord1').val();
 		var password2 = $('#PassWord2').val();
+		var mobile = $('#mobile').val();
 
 		$('.logTips').hide();
 
@@ -13,6 +14,11 @@ $(function(){
 			$('#name_tip').text('姓名不能为空').show();
 			return;
 		}
+        if(!mobile)
+        {
+            $('#mobile_tip').text('手机号不能为空').show();
+            return;
+        }
 		else if(name.length > 15)
 		{
 			$('#name_tip').text('姓名太长了').show();
@@ -40,7 +46,7 @@ $(function(){
 			type:'POST',
 			url:url,
 			dataType: "json",
-			data:{name:name,password1:password1,password2:password2},
+			data:{name:name,password1:password1,password2:password2,mobile:mobile},
 			success:function(data){
 				if(data.errorCode)
 				{
@@ -176,6 +182,11 @@ $(function(){
                         <label>姓名：</label>
                         <input name="name"  type="text" maxlength="20" id="NickName">
                         <p class="logTips" id="name_tip" style="display: none;"></p>
+                    </li>
+                    <li class="login_password">
+                        <label>手机号：</label>
+                        <input name="mobile" type="text" maxlength="15" id="mobile">
+                        <p class="logTips"  id="mobile_tip"  style="display: none;"></p>
                     </li>
                     <li class="login_password">
                         <label>密码：</label>

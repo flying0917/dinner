@@ -274,11 +274,73 @@ class SiteController extends FormerController
             $this->errorOutput(array('errorCode' => 1,'errorText' => '您选择的这家餐厅不存在或者已经倒闭了！'));
         }
 
+
+
+
         $resData=array(
-            'shop' 		=> $shopData,
+            'shop' 		=> $shopData
         );
 
         $this->output(array('success'=>1,'data'=>$resData,'msg'=>'获取饭店信息成功'));
+    }
+
+
+    //获取留言
+    public function actionGetMessageAjax()
+    {
+        if(Yii::app()->request->getParam('shop_id'))
+        {
+            $shop_id=Yii::app()->request->getParam('shop_id');
+            //获取该店的留言
+            $criteria = new CDbCriteria();
+            $criteria->order = 't.order_id DESC';
+            $criteria->condition = 't.shop_id=:shop_id AND t.status=:status';
+            $criteria->params = array(':shop_id' => $shop_id,':status' => 1);
+            //构建分页
+            $currentPage = Yii::app()->request->getParam('page');
+            $pageSize = Yii::app()->request->getParam('pagesize');
+            if(!empty($currentPage)) {
+                $currentPage = intval( $currentPage );
+            } else {
+                $currentPage = 1;
+            }
+            $limit = !empty( $pageSize ) ? intval( $pageSize ) : 10;
+            $offset = ($currentPage-1) * $limit;
+            $criteria->offset = $offset;
+            $criteria->limit = $limit;
+            $messageMode = Message::model()->with('members','shops','replys')->findAll($criteria);
+            $message = array();
+            foreach($messageMode AS $k => $v)
+            {
+                $message[$k] = $v->attributes;
+
+                $message[$k]['shop_name'] = $v->shops->name;
+                $message[$k]['user_name'] = $v->members->name;
+                $message[$k]['create_time'] = date('Y-m-d H:i:s',$v->create_time);
+                $message[$k]['status_text'] = Yii::app()->params['message_status'][$v->status];
+                $message[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+
+                $_replys = Reply::model()->with('members')->findAll(array(
+                    'condition' => 'message_id=:message_id',
+                    'params'	=> array(':message_id' => $v->id),
+                ));
+
+                if(!empty($_replys))
+                {
+                    foreach ($_replys AS $kk => $vv)
+                    {
+                        $message[$k]['replys'][$kk] = $vv->attributes;
+                        $message[$k]['replys'][$kk]['create_time'] 	= date('Y-m-d H:i:s',$vv->create_time);
+                        $message[$k]['replys'][$kk]['user_name'] 	= ($vv->user_id == -1)?'商家说':$vv->members->name;
+                    }
+                }
+            }
+            $resData=array(
+                'message' 		=> $message
+            );
+
+            $this->output(array('success'=>1,'data'=>$resData,'msg'=>'获取饭店信息成功'));
+        }
     }
 
 
@@ -882,10 +944,17 @@ class SiteController extends FormerController
         $criteria->params = array(':food_user_id' => $member_id);
 
         //构建分页
-        $count=FoodOrder::model()->count($criteria);
-        $pages = new CPagination($count);
-        $pages->pageSize = Yii::app()->params['pagesize'];
-        $pages->applyLimit($criteria);
+        $currentPage = Yii::app()->request->getParam('page');
+        $pageSize = Yii::app()->request->getParam('pagesize');
+        if(!empty($currentPage)) {
+            $currentPage = intval( $currentPage );
+        } else {
+            $currentPage = 1;
+        }
+        $limit = !empty( $pageSize ) ? intval( $pageSize ) : 10;
+        $offset = ($currentPage-1) * $limit;
+        $criteria->offset = $offset;
+        $criteria->limit = $limit;
         //按条件获取数据
 
         $model = FoodOrder::model()->with('shops','food_log')->findAll($criteria);
@@ -1072,11 +1141,16 @@ class SiteController extends FormerController
 		$name = Yii::app()->request->getPost('name');
 		$password1 = Yii::app()->request->getPost('password1');
 		$password2 = Yii::app()->request->getPost('password2');
+		$mobile = Yii::app()->request->getPost('mobile');
 
 		if(!$name)
 		{
 			$this->errorOutput(array('errorCode' => 1,'errorText' => '姓名不能为空'));
 		}
+        if(!$mobile)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '手机号不能为空'));
+        }
 		else if(strlen($name) > 15)
 		{
 			$this->errorOutput(array('errorCode' => 1,'errorText' => '姓名太长不能超过15个字符'));
@@ -1107,6 +1181,7 @@ class SiteController extends FormerController
 		$model = new Members();
 		$model->name = $name;
 		$model->salt = $salt;
+		$model->mobile = $mobile;
 		$model->password = md5($salt . $password1);
 		$model->create_time = time();
 		$model->update_time = time();
