@@ -1544,6 +1544,56 @@ class SiteController extends FormerController
 			$this->errorOutput(array('errorCode' => 6,'errorText' => '留言失败'));
 		}
 	}
+
+    //提交留言
+    public function actionSubmitMessageForApp()
+    {
+        $content = Yii::app()->request->getParam('content');
+        $shop_id = Yii::app()->request->getParam('shop_id');
+
+        if(!isset(Yii::app()->user->member_userinfo))
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '你还未登录，请先去登录'));
+        }
+        else
+        {
+            $user_id = Yii::app()->user->member_userinfo['id'];
+        }
+
+        if(!$content)
+        {
+            $this->errorOutput(array('errorCode' => 2,'errorText' => '留言内容不能为空'));
+        }
+
+
+        if(!$shop_id)
+        {
+            $this->errorOutput(array('errorCode' => 4,'errorText' => '没有商店id'));
+        }
+
+
+        $model = new Message();
+        $model->shop_id = $shop_id;
+        $model->user_id = $user_id;
+        $model->content = $content;
+        $model->create_time = time();
+        if($model->save())
+        {
+            $model->order_id = $model->id;
+            if($model->save())
+            {
+                $this->output(array('success' => 1,'successText' => '留言成功'));
+            }
+            else
+            {
+                $this->errorOutput(array('errorCode' => 6,'errorText' => '留言失败'));
+            }
+        }
+        else
+        {
+            $this->errorOutput(array('errorCode' => 6,'errorText' => '留言失败'));
+        }
+    }
 	
 	//回复留言
 	public function actionReplyMessage()
