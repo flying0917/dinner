@@ -129,7 +129,6 @@ class SiteController extends FormerController
 		//查询出会员账户余额小于10元的用户
 		$members = Members::model()->findAll('balance < :balance',array(':balance' => 20));
 		$members = CJSON::decode(CJSON::encode($members));
-
 		//输出数据
 		$output = array(
 			'shops' 	=> $shopData,
@@ -1264,7 +1263,6 @@ class SiteController extends FormerController
                 if(isset($_POST['Shops']))
                 {
                     $shopData=array();
-
                     $shopData=$_POST['Shops'];
                     $shopData['useid']=$user_id;
                     $model->attributes=$shopData;
