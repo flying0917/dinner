@@ -666,7 +666,6 @@ class SiteController extends FormerController
         $memberData = Members::model()->find($criteria);
         $memberData = CJSON::decode(CJSON::encode($memberData));
 
-
         if($memberData["roleid"]==0) {
             //普通用户
             $this->actionMemberCenter();
@@ -696,6 +695,7 @@ class SiteController extends FormerController
 
         $model = FoodOrder::model()->with('shops', 'members')->findAll($shop_criteria);
         $data = array();
+
         foreach ($model AS $k => $v) {
             $data[$k] = $v->attributes;
             $data[$k]['shop_name'] = $v->shops->name;
@@ -703,6 +703,30 @@ class SiteController extends FormerController
             $data[$k]['create_time'] = date('Y-m-d H:i:s', $v->create_time);
             $data[$k]['status_text'] = Yii::app()->params['order_status'][$v->status];
             $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+
+            //给订单信息添加描述
+            $data[$k]['product_info'] = unserialize($v->product_info);
+
+
+            $data[$k]["Count"]=0;
+            foreach($data[$k]["product_info"] AS $ks=>$vs)
+            {
+                $data[$k]["product_info"][$ks]["total"]=intval($vs["Count"])*floatval($vs["Price"]);
+                $data[$k]["total"]+=$data[$k]["product_info"][$ks]["total"];
+
+                $data[$k]["Count"]+=intval($vs["Count"]);
+
+            }
+            $orderText="";
+            foreach ($data[$k]['product_info'] AS $key=>$value)
+            {
+                if($key<2)
+                {
+                    $orderText.=$value["Name"].'+';
+                }
+            }
+            $orderText.=" 等".$data[$k]["Count"].'件商品';
+            $data[$k]['order_text']=$orderText;
         }
 
         $this->output(array("success"=>1,"msg"=>"获取订单成功","data"=>$data));
