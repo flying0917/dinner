@@ -9,7 +9,7 @@ class SiteController extends FormerController
 	{
 		return array(
 			'checkLoginControl + confirmorder,orderok,membercenter,myorder,modifypassword,domodify,systemnotice,seeconsume,menus,menusForm,foodorder,foodOrderForm,todayOrder',//检测是否登录
-			'checkLoginAjax + myOrderListAjax,getUserInfo,confirmOrderAjax,myOrderAjax,cancelOrder',//检测ajax请求是否登录
+			'checkLoginAjax + myOrderListAjax,getUserInfo,confirmOrderAjax,myOrderAjax,cancelOrder,foodorderAjax',//检测ajax请求是否登录
 			'checkIsCartEmpty + lookcart,confirmorder',//检测购物车是否为空
 			/*'checkReqiest + doregister,domodify,submitmessage,replymessage',//判断是不是ajax请求*/
 			'checkIsOnTime +lookmenu,lookcart,confirmorder',//判断是否在订餐时间内
@@ -654,6 +654,60 @@ class SiteController extends FormerController
 
 
 
+    //商家订单页面ajax
+    public function actionFoodorderAjax()
+    {
+        //查询出用户的基本信息
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria=new CDbCriteria;
+        $criteria->select = 'roleid,name,sex,avatar,email,balance';
+        $criteria->condition = 'id=:id';
+        $criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($criteria);
+        $memberData = CJSON::decode(CJSON::encode($memberData));
+
+
+        if($memberData["roleid"]==0) {
+            //普通用户
+            $this->actionMemberCenter();
+            exit();
+        }
+        //商家用户
+        $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+        $shopdata = CJSON::decode(CJSON::encode($shopdata));
+        //创建查询条件
+        $shop_criteria = new CDbCriteria();
+        $shop_criteria->condition = 'shop_id=:shop_id';
+        $shop_criteria->params = array(':shop_id' =>$shopdata['id']);
+        $shop_criteria->order = 't.create_time DESC';
+        $count = FoodOrder::model()->count($shop_criteria);
+        //构建分页
+        $currentPage = Yii::app()->request->getParam('page');
+        $pageSize = Yii::app()->request->getParam('pagesize');
+        if(!empty($currentPage)) {
+            $currentPage = intval( $currentPage );
+        } else {
+            $currentPage = 1;
+        }
+        $limit = !empty( $pageSize ) ? intval( $pageSize ) : 10;
+        $offset = ($currentPage-1) * $limit;
+        $criteria->offset = $offset;
+        $criteria->limit = $limit;
+
+        $model = FoodOrder::model()->with('shops', 'members')->findAll($shop_criteria);
+        $data = array();
+        foreach ($model AS $k => $v) {
+            $data[$k] = $v->attributes;
+            $data[$k]['shop_name'] = $v->shops->name;
+            $data[$k]['user_name'] = $v->members->name;
+            $data[$k]['create_time'] = date('Y-m-d H:i:s', $v->create_time);
+            $data[$k]['status_text'] = Yii::app()->params['order_status'][$v->status];
+            $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+        }
+
+        $this->output(array("success"=>1,"msg"=>"获取订单成功","data"=>$data));
+
+    }
 
     //商家订单页面
     public function actionFoodorder()
