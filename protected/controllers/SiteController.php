@@ -9,7 +9,7 @@ class SiteController extends FormerController
 	{
 		return array(
 			'checkLoginControl + confirmorder,orderok,membercenter,myorder,modifypassword,domodify,systemnotice,seeconsume,menus,menusForm,foodorder,foodOrderForm,todayOrder',//检测是否登录
-			'checkLoginAjax + myOrderListAjax,getUserInfo,confirmOrderAjax,myOrderAjax,cancelOrder,foodorderAjax',//检测ajax请求是否登录
+			'checkLoginAjax + myOrderListAjax,getUserInfo,confirmOrderAjax,myOrderAjax,cancelOrder,foodorderAjax,finishOrder',//检测ajax请求是否登录
 			'checkIsCartEmpty + lookcart,confirmorder',//检测购物车是否为空
 			/*'checkReqiest + doregister,domodify,submitmessage,replymessage',//判断是不是ajax请求*/
 			'checkIsOnTime +lookmenu,lookcart,confirmorder',//判断是否在订餐时间内
@@ -344,7 +344,78 @@ class SiteController extends FormerController
 
 
 
+    //菜单页面ajax
+    public function actionMenusAjax()
+    {
+        //创建查询条件
+        $menuname = Yii::app()->request->getParam('k');
 
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $s_criteria=new CDbCriteria;
+        $s_criteria->select = 'roleid,name,sex,avatar,email,balance';
+        $s_criteria->condition = 'id=:id';
+        $s_criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($s_criteria);
+        $memberData = CJSON::decode(CJSON::encode($memberData));
+        $shopdata = array();
+        if($memberData["roleid"]==1){
+            //商家用户
+            $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+            $shopdata = CJSON::decode(CJSON::encode($shopdata));
+        }
+
+        $shopId = $shopdata['id'];
+        $criteria = new CDbCriteria();
+        $criteria->condition = 'shop_id=:shop_id';
+        $criteria->params = array(':shop_id' => $shopId);
+        $criteria->order = 't.order_id DESC';
+        if($menuname)
+        {
+            $criteria->compare('t.name',$menuname,true);
+        }
+
+        if($shopId)
+        {
+            $criteria->compare('t.shop_id',$shopId);
+        }
+        $count=Menus::model()->count($criteria);
+        //构建分页
+        $currentPage = Yii::app()->request->getParam('page');
+        $pageSize = Yii::app()->request->getParam('pagesize');
+        if(!empty($currentPage)) {
+            $currentPage = intval( $currentPage );
+        } else {
+            $currentPage = 1;
+        }
+        $limit = !empty( $pageSize ) ? intval( $pageSize ) : 10;
+        $offset = ($currentPage-1) * $limit;
+        $criteria->offset = $offset;
+        $criteria->limit = $limit;
+        $model = Menus::model()->with('food_sort','image','shops')->findAll($criteria);
+        $data = array();
+        foreach($model AS $k => $v)
+        {
+            $data[$k] = $v->attributes;
+            $data[$k]['index_pic'] = $v->index_pic?Yii::app()->params['img_url'] . $v->image->filepath . $v->image->filename:'';
+            $data[$k]['sort_name'] = $v->food_sort->name;
+            $data[$k]['shop_name'] = $v->shops->name;
+            $data[$k]['create_time'] = Yii::app()->format->formatDate($v->create_time);
+            $data[$k]['status_text'] = Yii::app()->params['menu_status'][$v->status];
+            $data[$k]['status_color'] = Yii::app()->params['status_color'][$v->status];
+            $data[$k]['price'] = $v->price . '元/份';
+        }
+
+
+
+        //取出所有店家供前端选择
+        $shops = Shops::model()->findAll();
+        $shops = CJSON::decode(CJSON::encode($shops));
+        //输出到前端
+        $this->output(array(
+            'data' 	=> $data,
+            'shops' => $shops
+        ));
+    }
 
 
 
@@ -566,11 +637,11 @@ class SiteController extends FormerController
 	{
 		//确认订单之前查看用户余额够不够付
 
-		$memberInfo = Members::model()->find('id=:id',array(':id' => Yii::app()->user->member_userinfo['id']));
-		if($memberInfo->balance < $this->order['Total'] && !in_array(Yii::app()->user->member_userinfo['id'], Yii::app()->params['allow_user_id'])) 
+		/*$memberInfo = Members::model()->find('id=:id',array(':id' => Yii::app()->user->member_userinfo['id']));
+		if($memberInfo->balance < $this->order['Total'] && !in_array(Yii::app()->user->member_userinfo['id'], Yii::app()->params['allow_user_id']))
 		{
 			throw new CHttpException(404,Yii::t('yii','亲！您的账户余额不足，不能下单哦，到前台妹子交钱吧！'));
-		}
+		}*/
 		
 		//构建数据
 		$foodOrder = new FoodOrder();
@@ -1515,13 +1586,13 @@ class SiteController extends FormerController
 			{
 				$this->errorOutput(array('errorCode' => 1,'errorText' => '没有id'));
 			}
-			
+
 			//判断当前时间有没有已经过了订餐的时间，如果过了订餐的时间，就不能取消订单了，只能让妹子操作后台取消
     		if(!Yii::app()->check_time->isOnTime())
     		{
     			$this->errorOutput(array('errorCode' => 1,'errorText' => '已经过了订餐时间，您暂时不能取消订单，如果确实需要取消，请联系前台妹子'));
     		}
-			
+
 			$orderInfo = FoodOrder::model()->find('id=:id AND food_user_id=:food_user_id',array(':id' => $food_order_id,':food_user_id' => Yii::app()->user->member_userinfo['id']));
 			if(!$orderInfo)
 			{
@@ -1531,7 +1602,7 @@ class SiteController extends FormerController
 			{
 				$this->errorOutput(array('errorCode' => 1,'errorText' => '该订单不能被取消'));
 			}
-			
+
 			$orderInfo->status = 3;
 			if($orderInfo->save())
 			{
@@ -1544,16 +1615,64 @@ class SiteController extends FormerController
 				{
 					$this->output(array('success' => 1,'successText' => '取消订单成功'));
 				}
-				else 
+				else
 				{
 					$this->errorOutput(array('errorCode' => 1,'errorText' => '更新订单状态失败'));
 				}
 			}
-			else 
+			else
 			{
 				$this->errorOutput(array('errorCode' => 1,'errorText' => '取消订单失败'));
 			}
 	}
+
+    //用户确认收到订单
+    public function actionFinishOrder()
+    {
+        $food_order_id = Yii::app()->request->getParam('id');
+        if(!$food_order_id)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '没有id'));
+        }
+
+        //判断当前时间有没有已经过了订餐的时间，如果过了订餐的时间，就不能取消订单了，只能让妹子操作后台取消
+        if(!Yii::app()->check_time->isOnTime())
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '已经过了订餐时间，您暂时不能取消订单，如果确实需要取消，请联系前台妹子'));
+        }
+
+        $orderInfo = FoodOrder::model()->find('id=:id AND food_user_id=:food_user_id',array(':id' => $food_order_id,':food_user_id' => Yii::app()->user->member_userinfo['id']));
+        if(!$orderInfo)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '该订单不存在'));
+        }
+        else if($orderInfo->status != 2)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '该订单不能被确认'));
+        }
+
+        $orderInfo->status = 5;
+        if($orderInfo->save())
+        {
+            //创建一条订单日志
+            $foodOrderLog = new FoodOrderLog();
+            $foodOrderLog->food_order_id = $food_order_id;
+            $foodOrderLog->status = $orderInfo->status;
+            $foodOrderLog->create_time = time();
+            if($foodOrderLog->save())
+            {
+                $this->output(array('success' => 1,'successText' => '完成订单成功'));
+            }
+            else
+            {
+                $this->errorOutput(array('errorCode' => 1,'errorText' => '更新订单状态失败'));
+            }
+        }
+        else
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '完成订单失败'));
+        }
+    }
 	
 	//美食分享
 	public function actionFoodShare()

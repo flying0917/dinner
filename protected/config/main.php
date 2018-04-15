@@ -182,6 +182,7 @@ return array(
 			2 => '商家已接单，请等待配送',
 			3 => '用户取消订单',
 			4 => '妹子取消订单',
+			5 => '订单已完成',
 		),
 		'homeIndexPic' => 'home.jpg',
 		'material_path' => 'application.uploads',

@@ -22,6 +22,28 @@ $(function(){
 			})
 		}
 	})
+    $('.finish_order').click(function(){
+        if(confirm('您确认要取消订单'))
+        {
+            var url = $(this).attr('_href');
+            $.ajax({
+                type:'GET',
+                url:url,
+                dataType: "json",
+                success:function(data){
+                    if(data.errorCode)
+                    {
+                        alert(data.errorText);
+                    }
+                    else if(data.success)
+                    {
+                        alert('取消订单成功');
+                        window.location.reload();
+                    }
+                }
+            })
+        }
+    })
 })
 </script>
 <div class="shadow clearfix" id="pCenter">
@@ -48,6 +70,9 @@ $(function(){
 		                                    <?php if($v['status'] == 1):?>
 		                                    <a href="javascript:void(0);" _href="<?php echo Yii::app()->createUrl('site/cancelorder',array('id' => $v['id']));?>" class="cancel_order">取消订单</a>
 		                                    <?php endif;?>
+                                            <?php if($v['status'] == 2):?>
+                                                <a href="javascript:void(0);" _href="<?php echo Yii::app()->createUrl('site/finishOrder',array('id' => $v['id']));?>" class="finish_order">确认订单</a>
+                                            <?php endif;?>
 		                                </td>
 		                                <td class="col3 last">
 		                                    <span style="color:#5ad;font-size:12px;">下单日期：<?php echo $v['create_order_date'];?></span>
