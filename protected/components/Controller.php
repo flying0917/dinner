@@ -38,15 +38,15 @@ class Controller extends CController
             if($memberData["roleid"]==1){
                 // 商家用户
                 // 可以访问
+
             } else {
                 // 普通用户
                 if(!Yii::app()->request->isAjaxRequest)
                 {
-                    $this->redirect(Yii::app()->createUrl('user/login'));
+
                 }
                 else
                 {
-
                     $this->errorOutput(array('errorCode' => 1,'errorText' => '未登录'));
                 }
             }
