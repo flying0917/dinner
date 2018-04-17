@@ -79,17 +79,31 @@ class MenusController extends Controller
 
         if(isset($_POST['Menus']))
         {
-            $model->attributes=$_POST['Menus'];
-            $model->create_time = time();
-            if($model->save())
+            $member_id = Yii::app()->user->member_userinfo['id'];
+            $shopdata = array();
+            //商家用户
+            $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+            $shopdata = CJSON::decode(CJSON::encode($shopdata));
+            if(!empty($shopdata))
             {
-                $model->order_id = $model->id;
-                $model->save();
-                $this->output(array('success' => 1,'msg' => '创建成功'));
+                $shopId = $shopdata['id'];
+                $_POST['Menus']['shop_id']=$shopId;
+                $model->attributes=$_POST['Menus'];
+                $model->create_time = time();
+                if($model->save())
+                {
+                    $model->order_id = $model->id;
+                    $model->save();
+                    $this->output(array('success' => 1,'msg' => '创建成功'));
+                }
+                else
+                {
+                    $this->errorOutput(array('errorCode' => 1,'errorText' => '参数错误'));
+                }
             }
             else
             {
-                $this->errorOutput(array('errorCode' => 1,'errorText' => '参数错误'));
+                $this->errorOutput(array('errorCode' => 1,'errorText' => '您没有权限'));
             }
         }
         else
