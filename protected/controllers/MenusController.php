@@ -238,9 +238,7 @@ class MenusController extends Controller
 	//审核
 	public function actionAudit()
 	{
-		//审核设定成只能ajax访问
-		if(Yii::app()->request->isAjaxRequest)
-		{
+
 			$id = Yii::app()->request->getParam('id');
 			if(!$id)
 			{
@@ -259,17 +257,13 @@ class MenusController extends Controller
 			$model->status = $status;
 			if($model->save())
 			{
-				$this->output(array('status' => $status,'status_text' => Yii::app()->params['menu_status'][$status],'status_color' => Yii::app()->params['status_color'][$status]));
+				$this->output(array('success'=>1,'status' => $status,'status_text' => Yii::app()->params['menu_status'][$status],'status_color' => Yii::app()->params['status_color'][$status]));
 			}
 			else 
 			{
 				$this->output(array('errorCode' => 1,'errorText' => '审核失败'));
 			}
-		}
-		else 
-		{
-			throw new CHttpException(404,Yii::t('yii','非法访问'));
-		}		
+
 	}
 
 	//列表
