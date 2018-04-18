@@ -1015,7 +1015,7 @@ class SiteController extends FormerController
         //查询出用户的基本信息
         $member_id = Yii::app()->user->member_userinfo['id'];
         $criteria=new CDbCriteria;
-        $criteria->select = 'name,sex,avatar,email,balance,mobile';
+        $criteria->select = 'name,sex,avatar,email,balance,mobile,roleid';
         $criteria->condition = 'id=:id';
         $criteria->params = array(':id' => $member_id);
         $memberData = Members::model()->find($criteria);
