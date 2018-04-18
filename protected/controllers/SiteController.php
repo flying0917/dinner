@@ -761,8 +761,8 @@ class SiteController extends FormerController
         }
         $limit = !empty( $pageSize ) ? intval( $pageSize ) : 10;
         $offset = ($currentPage-1) * $limit;
-        $criteria->offset = $offset;
-        $criteria->limit = $limit;
+        $shop_criteria->offset = $offset;
+        $shop_criteria->limit = $limit;
 
         $model = FoodOrder::model()->with('shops', 'members')->findAll($shop_criteria);
         $data = array();
