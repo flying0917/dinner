@@ -19,7 +19,7 @@ class MenusController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update','audit','delete','createAjax','updateAjax','deleteAjax'),
+				'actions'=>array('create','update','audit','delete','createAjax','updateAjax','deleteAjax','formAjax'),
 				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
@@ -156,7 +156,7 @@ class MenusController extends Controller
         $id = Yii::app()->request->getParam('id');
         if(!isset($id))
         {
-            throw new CHttpException(404,'param id is not exists');
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '没有id'));
         }
 
         //处理图片
@@ -209,6 +209,27 @@ class MenusController extends Controller
 			'shops' => $shops,
 		));
 	}
+    //表单页
+    public function actionFormAjax()
+    {
+        $id = Yii::app()->request->getParam('id');
+        if($id)
+        {
+            $model = $this->loadModel($id);
+            $data = CJSON::decode(CJSON::encode($model));
+            $data['index_pic'] = $data['index_pic']?Yii::app()->params['img_url'] . $model->image->filepath . $model->image->filename:'';
+            $this->output(array(
+                'success'=>1,
+                'data' 	=> $data,
+                'msg'=>'获取表单数据成功'
+            ));
+        }
+        else
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '缺少id'));
+        }
+
+    }
 
 	//删除
 	public function actionDelete()
