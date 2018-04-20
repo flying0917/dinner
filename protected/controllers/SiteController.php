@@ -1087,7 +1087,9 @@ class SiteController extends FormerController
     {
        /* $is_today = Yii::app()->request->getParam('today');*/
         $member_id = Yii::app()->user->member_userinfo['id'];
+        $shopname = Yii::app()->request->getParam('k');
         $criteria = new CDbCriteria;
+
         $criteria->order = 't.create_time DESC';
         $criteria->select = '*';
         $criteria->condition = 'food_user_id=:food_user_id';
@@ -1107,6 +1109,11 @@ class SiteController extends FormerController
         $criteria->limit = $limit;
         //按条件获取数据
 
+
+        if(!empty($shopname))
+        {
+            $criteria->compare('shops.name',$shopname,true,'AND');
+        }
         $model = FoodOrder::model()->with('shops','food_log')->findAll($criteria);
         $orderData = array();
         foreach ($model AS $k => $v)

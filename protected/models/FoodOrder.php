@@ -82,7 +82,8 @@ class FoodOrder extends CActiveRecord
 		$criteria->compare('status',$this->status);
 		$criteria->compare('food_user_id',$this->food_user_id);
 
-		return new CActiveDataProvider($this, array(
+
+        return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
 		));
 	}
