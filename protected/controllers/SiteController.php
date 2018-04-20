@@ -9,7 +9,7 @@ class SiteController extends FormerController
 	{
 		return array(
 			'checkLoginControl + confirmorder,orderok,membercenter,myorder,modifypassword,domodify,systemnotice,seeconsume,menus,menusForm,foodorder,foodOrderForm,todayOrder',//检测是否登录
-			'checkLoginAjax + myOrderListAjax,getUserInfo,confirmOrderAjax,myOrderAjax,cancelOrder,foodorderAjax,finishOrder,domodifyForApp',//检测ajax请求是否登录
+			'checkLoginAjax + myOrderListAjax,getUserInfo,confirmOrderAjax,myOrderAjax,cancelOrder,foodorderAjax,finishOrder,domodifyForApp,userinfo',//检测ajax请求是否登录
 			'checkIsCartEmpty + lookcart,confirmorder',//检测购物车是否为空
 			/*'checkReqiest + doregister,domodify,submitmessage,replymessage',//判断是不是ajax请求*/
 			'checkIsOnTime +lookmenu,lookcart,confirmorder',//判断是否在订餐时间内
@@ -724,6 +724,28 @@ class SiteController extends FormerController
             $this->render($view,array('member' => $memberData,'pMenu' => $pMenu));
         }
 	}
+
+    //用户信息
+    public function actionUserinfo()
+    {
+        //查询出用户的基本信息
+        $member_id = Yii::app()->user->member_userinfo['id'];
+        $criteria=new CDbCriteria;
+        $criteria->select = 'roleid,name,sex,avatar,email,balance';
+        $criteria->condition = 'id=:id';
+        $criteria->params = array(':id' => $member_id);
+        $memberData = Members::model()->find($criteria);
+        $memberData = CJSON::decode(CJSON::encode($memberData));
+        if($memberData["roleid"]==1){
+            //商家用户
+            $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
+            $shopdata = CJSON::decode(CJSON::encode($shopdata));
+            $this->output(array('member' => $memberData,'shop'=>$shopdata));
+        }else{
+            //普通用户
+            $this->output(array('member' => $memberData));
+        }
+    }
 
 
 
