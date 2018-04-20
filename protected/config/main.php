@@ -197,9 +197,9 @@ return array(
 												   			array(
 													             'zh_name'       => '首页',
 														         'en_name'       => 'home',
-														         'link'          => 'index', 
+														         'link'          => 'index',
 												   				),
-						       							 ),  
+						       							 ),
 						    ),
 						    array(
 						        'zh_name'       => '订餐',

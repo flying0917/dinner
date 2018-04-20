@@ -25,6 +25,22 @@ else
 		<div class="tab-content default-tab" id="tab1">
           <form action="<?php echo $_action;?>" method="post" enctype="multipart/form-data">
             <fieldset>
+
+            <p>
+                <label>商家账号</label>
+                <input class="text-input small-input" type="text"  name="Shops[name]" value="<?php echo CHtml::encode($data['name']); ?>"/>
+            </p>
+
+            <p>
+                <label>密码</label>
+                <input class="text-input small-input" type="text"  name="Shops[name]" value="<?php echo CHtml::encode($data['name']); ?>"/>
+            </p>
+
+            <p>
+                <label>确认密码</label>
+                <input class="text-input small-input" type="text"  name="Shops[name]" value="<?php echo CHtml::encode($data['name']); ?>"/>
+            </p>
+
             <p>
               <label>名称</label>
               <input class="text-input small-input" type="text"  name="Shops[name]" value="<?php echo CHtml::encode($data['name']); ?>"/>

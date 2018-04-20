@@ -34,16 +34,12 @@ Yii::app()->clientScript->registerCssFile(Yii::app()->baseUrl . "/assets/css/inv
 <div id="main-content">
 <!-- Page Head -->
 <h2>欢迎使用订餐系统</h2>
-<p id="page-intro"><a href="<?php echo Yii::app()->createUrl('site');?>" target="_blank">前台首页</a></p>
+
 <!-- End .shortcut-buttons-set -->
 	<div class="clear"></div>
 		<?php echo $content;?>
 	<div class="clear"></div>
-    <div id="footer"> 
-    <small>
-      &#169; Copyright 2018 pair科技有限公司 | Powered by Pair| <a href="#">Top</a>
-    </small> 
-    </div>
+
   </div>
 </div>
 </body>

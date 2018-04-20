@@ -47,7 +47,11 @@ class Controller extends CController
                 }
                 else
                 {
-                    $this->errorOutput(array('errorCode' => 1,'errorText' => '未登录'));
+                    // 后台用户
+                    if(!isset(Yii::app()->user->admin_userinfo) && (!defined('NO_LOGIN') || !NO_LOGIN))
+                    {
+                        $this->errorOutput(array('errorCode' => 1,'errorText' => '未登录'));
+                    }
                 }
             }
 		} else {
