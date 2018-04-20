@@ -55,7 +55,7 @@ $(function(){
                 <th>电话</th>
                 <th>邮箱</th>
                 <th>状态</th>
-                <th>账户余额</th>
+
                 <th>操作</th>
               </tr>
             </thead>
@@ -93,11 +93,8 @@ $(function(){
 		                <td><?php echo $v['mobile'];?></td>
 		                <td><?php echo $v['email'];?></td>
 		                <td  _url="<?php echo Yii::app()->createUrl('members/audit',array('id' => $v['id'])); ?>"  class="status_row" style="cursor:pointer;color:<?php echo $v['status_color'];?>"><?php echo $v['status_text'];?></td>
-		                <td><?php echo $v['balance'];?></td>
+
 		                <td>
-		                	<a href="<?php echo Yii::app()->createUrl('members/recharge',array('id' => $v['id']));?>"  class="button">充值</a>
-		                	<a href="<?php echo Yii::app()->createUrl('members/deduct',array('id' => $v['id']));?>"  class="button">扣款</a>
-		                	<a href="<?php echo Yii::app()->createUrl('members/seerecord',array('user_id' => $v['id']));?>"  class="button">查看操作记录</a>
 		                	<a href="javascript:void(0);" _id="<?php echo $v['id'];?>"  class="button resetpass_btn">重置密码</a>
 		                  	<a href="javascript:void(0);" _href="<?php echo Yii::app()->createUrl('members/delete',array('id' => $v['id']));?>"  class="remove_row"><img src="<?php echo Yii::app()->baseUrl;?>/assets/images/icons/cross.png" alt="Delete" /></a>
 		                </td>		              

@@ -96,8 +96,7 @@ $(function(){
       <!-- End .content-box-header -->
       <div class="content-box-content">
         <div class="tab-content default-tab" id="tab1">
-        	<input type="button" value="一键扣款" class="button" id="onekey" />
-        	<label style="color: red">温馨提示：只扣除今天的未付款订单，账户余额不足的不予处理</label>
+        	<input type="button" value="一键接单" class="button" id="onekey" />
           <table>
             <thead>
               <tr>
@@ -157,7 +156,7 @@ $(function(){
 		                <td><?php echo $v['create_time'];?></td>
 		                <td>
 		                  <!-- Icons -->
-		                  <a href="javascript:void(0);" _href="<?php echo Yii::app()->createUrl('foodorder/deductmoney',array('id' => $v['id']));?>" class="deduct_money button">扣款</a>
+		                  <a href="javascript:void(0);" _href="<?php echo Yii::app()->createUrl('foodorder/deductmoney',array('id' => $v['id']));?>" class="deduct_money button">接单</a>
 		                  <a href="javascript:void(0);" _href="<?php echo Yii::app()->createUrl('foodorder/cancelorder',array('id' => $v['id']));?>" class="cancel_order button">取消订单</a>
 		                  <a href="<?php echo Yii::app()->createUrl('foodorder/form',array('id' => $v['id']));?>" title="查看"><img src="<?php echo Yii::app()->baseUrl;?>/assets/images/icons/information.png" alt="查看" /></a> 
 		                  <a href="javascript:void(0);" _href="<?php echo Yii::app()->createUrl('foodorder/delete',array('id' => $v['id']));?>"  class="remove_row"><img src="<?php echo Yii::app()->baseUrl;?>/assets/images/icons/cross.png" alt="Delete" /></a>

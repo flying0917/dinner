@@ -10,12 +10,14 @@ html {
 body {
                 font-family: Arial, Helvetica, sans-serif;
                 color: #555;
-                background: #f0f0f0 url('../images/bg-body.gif') top left repeat-y;
+                /*background: #f0f0f0 url('../images/bg-body.gif') top left repeat-y;*/
+                background-color:#F5F5F5;
                 font-size: 12px;
                 }
 
 #body-wrapper {
-                background: url('../images/bg-radial-gradient.gif') fixed 230px top no-repeat;
+                background-color:white;
+                /*background: url('../images/bg-radial-gradient.gif') fixed 230px top no-repeat;*/
                 }                
 
 /********************************      Elements styling      ********************************/
@@ -37,7 +39,7 @@ h5            { font-size: 14px; padding: 0 0 5px 0; }
 h6            { font-size: 12px; padding: 0 0 5px 0; }
 
 
-a              { color: #57a000; text-decoration: none; }
+a              { color: #0D79C6; text-decoration: none; }
 a:hover     { color: #000; }
 a:active     { color: #777; }
 a:focus     { outline: 1px; }
@@ -71,8 +73,10 @@ p {
 .button {
 				font-family: Verdana, Arial, sans-serif;
                 display: inline-block;
-                background: #459300 url('../images/bg-button-green.gif') top left repeat-x !important;
-                border: 1px solid #459300 !important;
+
+                background-color:#0D79C6;
+                /*background: #459300 url('../images/bg-button-green.gif') top left repeat-x !important;
+                border: 1px solid #459300 !important;*/
                 padding: 4px 7px 4px 7px !important;
                 color: #fff !important;
                 font-size: 11px !important;
@@ -98,7 +102,7 @@ a.remove-link:hover {
 /********************************      Sidebar      ********************************/
 
 #sidebar {
-                background: url('../images/bg-sidebar.gif') top left no-repeat;
+                background-color:#2B9DEE;
                 width: 230px;
                 height: 100%;
                 position: absolute;
@@ -144,14 +148,16 @@ a.remove-link:hover {
                 font-family: Helvetica, Arial, sans-serif;
                 }
 
-#sidebar #main-nav li {
+#sidebar #main-nav li a {
                 list-style: none;
                 padding-bottom: 10px;
                 text-align: right;
+
                 }
 
+
 #sidebar #main-nav li a.nav-top-item {
-                background: transparent url('../images/bg-menu-item-green.gif') right center no-repeat; /* Background image for default color scheme - green */
+                /*background: transparent url('../images/bg-menu-item-green.gif') right center no-repeat*/; /* Background image for default color scheme - green */
                 padding: 10px 15px;
                 color: #fff;
                 font-size: 14px;
@@ -160,6 +166,10 @@ a.remove-link:hover {
                 text-decoration: none;
                 }
 
+#sidebar #main-nav li a.nav-top-item-active
+{
+    background-color:#0D79C6;
+}
 #sidebar #main-nav li a.current {
                 background-image: url('../images/bg-menu-item-current.gif') !important;
                 color: #333;
@@ -186,7 +196,7 @@ a.remove-link:hover {
 #sidebar #main-nav ul li a {
                 padding: 8px 15px;
                 display: block;
-                color: #aaa;
+                color: white;
                 font-size: 13px;
                 line-height: 1.2em;
                 }
@@ -392,8 +402,9 @@ ul.content-box-tabs li a.current {
                 }
 
 .pagination a.current {
-                background: #469400 url('../images/bg-button-green.gif') top left repeat-x !important;
-                border-color: #459300 !important;
+
+                border-color: #0D79C6 !important;
+                background-color:#0D79C6;
                 color: #fff !important;
                 }
 				
@@ -578,11 +589,13 @@ form input[type="radio"] {
 
 body#login {
                 color: #fff;
-                background: #222 url('../images/bg-login.gif');
+                background: #222 url('../images/bg.jpg');
+                background-size:cover;
 				}
 				
 #login-wrapper {
-                background: url('../images/bg-login-top.png') top left repeat-x;
+                /*background: url('../images/bg-login-top.png') top left repeat-x;*/
+
 				}
 
 #login-wrapper #login-top {
@@ -606,13 +619,19 @@ body#login {
 				width: 70px;
 				padding: 0;
 				}
-				
 #login-wrapper #login-content input {
+    width: 200px;
+    float: right;
+    margin: 0 0 20px 0;
+    border: 0;
+    background: white;
+}
+#login-wrapper #login-content input[type='submit'] {
 				width: 200px;
 				float: right;
 				margin: 0 0 20px 0;
 				border: 0;
-				background: #fff;
+				background: #0D79C6;
 				}
 				
 #login-wrapper #login-content p {

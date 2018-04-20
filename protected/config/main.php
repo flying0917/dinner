@@ -210,14 +210,7 @@ return array(
 														        'zh_name'       => '菜单管理',
 														        'en_name'       => 'menus_manger',
 														        'link'          => 'menus',  
-						    								), 
-						    								/*
-						    								array(
-														        'zh_name'       => '菜系管理',
-														        'en_name'       => 'menu_sort_manger',
-														        'link'          => 'foodsort',  
-						    								), 
-						    								*/
+						    								),
 						    								array(
 														        'zh_name'       => '用户管理',
 														        'en_name'       => 'members_mamger',
@@ -233,11 +226,11 @@ return array(
 														        'en_name'       => 'order_manger',
 														        'link'          => 'foodorder',  
 						    								),
-						    								array(
+						    								/*array(
 														        'zh_name'       => '公告管理',
 														        'en_name'       => 'announcement_manger',
 														        'link'          => 'announcement',  
-						    								),
+						    								),*/
 						    								array(
 														        'zh_name'       => '留言管理',
 														        'en_name'       => 'message_manger',
@@ -245,23 +238,7 @@ return array(
 						    								),
 												        ),            
 						    ),
-						    array(
-						        'zh_name'       => '系统设置',
-						        'en_name'       => 'system_seeting',
-						        'link'          => '#',    
-						        'child'  		=>  array(
-						    								array(
-														        'zh_name'       => '素材管理',
-														        'en_name'       => 'material_manger',
-														        'link'          => 'material',  
-						    								), 
-						    								array(
-														        'zh_name'       => '点餐时间',
-														        'en_name'       => 'dinnertime_manger',
-														        'link'          => 'timeconfig',  
-						    								), 
-												        ),            
-						    ),
+
 						),
 	
 	),

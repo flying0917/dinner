@@ -27,7 +27,7 @@ Yii::app()->clientScript->registerCssFile(Yii::app()->baseUrl . "/assets/css/inv
       <h1 id="sidebar-title"><a href="#">订餐系统</a></h1>
       <a href="#"><img id="logo" src="<?php echo Yii::app()->baseUrl;?>/assets/images/logo.png" alt="订餐系统" /></a>
       <!-- Sidebar Profile links -->
-      <div id="profile-links"> 你好, <a href="#" title="Edit your profile"><?php echo Yii::app()->user->admin_userinfo['username'];?></a> | <a href="<?php echo Yii::app()->createUrl('user/logout'); ?>" title="退出">退出</a> </div>
+      <div id="profile-links" style="color:white;"> 你好, <a style="color:white !important;" href="#" title="Edit your profile"><?php echo Yii::app()->user->admin_userinfo['username'];?></a> | <a style="color:white !important;" href="<?php echo Yii::app()->createUrl('user/logout'); ?>" title="退出">退出</a> </div>
       	<?php $this->widget('application.widgets.CMenuList'); ?>
     </div>
   </div>
@@ -41,7 +41,7 @@ Yii::app()->clientScript->registerCssFile(Yii::app()->baseUrl . "/assets/css/inv
 	<div class="clear"></div>
     <div id="footer"> 
     <small>
-      &#169; Copyright 2015 加菲猫科技有限公司 | Powered by <a href="http://www.yiya520.com/">www.yiya520.com</a> | <a href="#">Top</a>
+      &#169; Copyright 2018 pair科技有限公司 | Powered by Pair| <a href="#">Top</a>
     </small> 
     </div>
   </div>

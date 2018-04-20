@@ -7,6 +7,8 @@ $(document).ready(function(){
 		
 		$("#main-nav li a.nav-top-item").click( // When a top menu item is clicked...
 			function () {
+                $("#main-nav li a.nav-top-item").removeClass("nav-top-item-active");
+				$(this).addClass("nav-top-item-active");
 				$(this).parent().siblings().find("ul").slideUp("normal"); // Slide up all sub menus except the one clicked
 				$(this).next().slideToggle("normal"); // Slide down the clicked sub menu
 				return false;
