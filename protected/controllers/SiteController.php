@@ -9,7 +9,7 @@ class SiteController extends FormerController
 	{
 		return array(
 			'checkLoginControl + confirmorder,orderok,membercenter,myorder,modifypassword,domodify,systemnotice,seeconsume,menus,menusForm,foodorder,foodOrderForm,todayOrder',//检测是否登录
-			'checkLoginAjax + myOrderListAjax,getUserInfo,confirmOrderAjax,myOrderAjax,cancelOrder,foodorderAjax,finishOrder',//检测ajax请求是否登录
+			'checkLoginAjax + myOrderListAjax,getUserInfo,confirmOrderAjax,myOrderAjax,cancelOrder,foodorderAjax,finishOrder,domodifyForApp',//检测ajax请求是否登录
 			'checkIsCartEmpty + lookcart,confirmorder',//检测购物车是否为空
 			/*'checkReqiest + doregister,domodify,submitmessage,replymessage',//判断是不是ajax请求*/
 			'checkIsOnTime +lookmenu,lookcart,confirmorder',//判断是否在订餐时间内
@@ -1580,6 +1580,57 @@ class SiteController extends FormerController
 	    $pMenu= $pMenu = $this->getCentermenuView( array());
 		$this->render('modifypassword',array("pMenu"=>$pMenu));
 	}
+
+    //确认修改
+    public function actionDomodifyForApp()
+    {
+        $cur_password = Yii::app()->request->getPost('cur_password');
+        $new_password = Yii::app()->request->getPost('new_password');
+        $comfirm_password = Yii::app()->request->getPost('comfirm_password');
+
+        if(!$cur_password)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '当前密码不能为空'));
+        }
+
+        if(!$new_password || !$comfirm_password)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '新密码不能为空'));
+        }
+        else if(strlen($new_password) > 15 || strlen($comfirm_password) > 15)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '新密码不能超过15个字符'));
+        }
+        else if($new_password !== $comfirm_password)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '两次密码不相符'));
+        }
+
+        //判断该用户是不是已经存在了
+        $_member = Members::model()->find('id=:id',array(':id' => Yii::app()->user->member_userinfo['id']));
+        if(!$_member)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '当前用户不存在'));
+        }
+        else if(md5($_member->salt . $cur_password) != $_member->password)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '当前密码输入错误'));
+        }
+
+        //随机长生一个干扰码
+        $salt = Common::getGenerateSalt();
+        $_member->salt = $salt;
+        $_member->password = md5($salt . $new_password);
+        $_member->update_time = time();
+        if($_member->save())
+        {
+            $this->output(array('success' => 1,'successText' => '修改成功'));
+        }
+        else
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '修改失败'));
+        }
+    }
 	
 	//确认修改
 	public function actionDomodify()
