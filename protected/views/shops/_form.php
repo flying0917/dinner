@@ -26,19 +26,20 @@ else
           <form action="<?php echo $_action;?>" method="post" enctype="multipart/form-data">
             <fieldset>
 
-            <p>
-                <label>商家账号</label>
-                <input class="text-input small-input" type="text"  name="Shops[name]" value="<?php echo CHtml::encode($data['name']); ?>"/>
+            <p class="login_name">
+                <label>商家账号：</label>
+                <input name="name" data-name="姓名" value="<?php echo CHtml::encode($data['username']); ?>" required id="shop_usern requiredame" type="text" maxlength="20" >
             </p>
+            <p class="login_password">
+                <label>新密码：</label>
+                <input name="password1" data-name="密码" required id="shop_password"  type="password" maxlength="15">
 
-            <p>
-                <label>密码</label>
-                <input class="text-input small-input" type="text"  name="Shops[name]" value="<?php echo CHtml::encode($data['name']); ?>"/>
             </p>
+            <p class="sure_password">
+                <label>
+                    确认密码：</label>
+                <input name="password2" data-name="确认密码" required data-identical="shop_password" id="shop_repassword" type="password" maxlength="15">
 
-            <p>
-                <label>确认密码</label>
-                <input class="text-input small-input" type="text"  name="Shops[name]" value="<?php echo CHtml::encode($data['name']); ?>"/>
             </p>
 
             <p>

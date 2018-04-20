@@ -31,37 +31,92 @@ class ShopsController extends Controller
 	//创建店铺
 	public function actionCreate()
 	{
-		$model=new Shops();
-		//处理图片
-		if($_FILES['logo'] && !$_FILES['logo']['error'])
-		{
-			$imgInfo = Yii::app()->material->upload('logo');
-			if($imgInfo)
-			{
-				$_POST['Shops']['logo'] = $imgInfo['id'];
-			}
-		}
-		
-		if(isset($_POST['Shops']))
-		{
-			$model->attributes=$_POST['Shops'];
-			$model->create_time = time();
-			$model->update_time = time();
-			if($model->save())
-			{
-				$model->order_id = $model->id;
-				$model->save();
-				$this->redirect(array('index'));
-			}
-			else 
-			{
-				throw new CHttpException(404,'创建失败');
-			}
-		}
-		else 
-		{
-			throw new CHttpException(404,'no post param');
-		}
+
+
+        //商家账号注册
+        $name = $_POST['name'];
+        $password1 = $_POST['password1'];
+        $password2 =$_POST['password2'];
+
+        if(!$name)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '姓名不能为空'));
+        }
+        else if(strlen($name) > 15)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '姓名太长不能超过15个字符'));
+        }
+
+        if(!$password1 || !$password2)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '密码不能为空'));
+        }
+        else if(strlen($password1) > 15 || strlen($password2) > 15)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '两次密码不能超过15个字符'));
+        }
+        else if($password1 !== $password2)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '两次密码不相符'));
+        }
+
+        //判断该用户是不是已经存在了
+        $_member = Members::model()->find('name=:name',array(':name' => $name));
+        if($_member)
+        {
+            $this->errorOutput(array('errorCode' => 1,'errorText' => '该用户已经存在'));
+        }
+
+        //随机长生一个干扰码
+        $salt = Common::getGenerateSalt();
+        $memberModel = new Members();
+        $memberModel->name = $name;
+        $memberModel->salt = $salt;
+        $memberModel->roleid=1;
+        $memberModel->password = md5($salt . $password1);
+        $memberModel->create_time = time();
+        $memberModel->update_time = time();
+
+        if($memberModel->save())
+        {
+            $memberModel->order_id = $memberModel->id;
+            $user_id= $memberModel->id;
+            $memberModel->save();
+
+            $model=new Shops();
+            //处理图片
+            if($_FILES['logo'] && !$_FILES['logo']['error'])
+            {
+                $imgInfo = Yii::app()->material->upload('logo');
+                if($imgInfo)
+                {
+                    $_POST['Shops']['logo'] = $imgInfo['id'];
+                }
+            }
+
+            if(isset($_POST['Shops']))
+            {
+                $model->attributes=$_POST['Shops'];
+                $model->useid=$user_id;
+                $model->create_time = time();
+                $model->update_time = time();
+                if($model->save())
+                {
+                    $model->order_id = $model->id;
+                    $model->save();
+                    $this->redirect(array('index'));
+                }
+                else
+                {
+                    throw new CHttpException(404,'创建失败');
+                }
+            }
+            else
+            {
+                throw new CHttpException(404,'no post param');
+            }
+        }
+
 	}
 
 
@@ -85,8 +140,10 @@ class ShopsController extends Controller
 		}
 		
 		$model=$this->loadModel($id);
+
 		if(isset($_POST['Shops']))
 		{
+
 			$model->attributes=$_POST['Shops'];
 			if($model->save())
 			{
@@ -111,7 +168,9 @@ class ShopsController extends Controller
 		{
 			$model = $this->loadModel($id);
 			$data = CJSON::decode(CJSON::encode($model));
+            $data['username']=$model->members->name;
 			$data['logo'] = $data['logo']?Yii::app()->params['img_url'] . $model->image->filepath . $model->image->filename:'';
+
 		}
 		
 		$this->render('_form',array(
@@ -275,7 +334,7 @@ class ShopsController extends Controller
 	//加载模型
 	public function loadModel($id)
 	{
-		$model=Shops::model()->with('image')->findByPk($id);
+		$model=Shops::model()->with('image','members')->findByPk($id);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;

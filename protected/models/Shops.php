@@ -48,6 +48,7 @@ class Shops extends CActiveRecord
 	{
 		return array(
 			'image' 	=> array(self::HAS_ONE, 'Material', '', 'on' => 't.logo = image.id'),
+            'members' 	=> array(self::HAS_ONE, 'Members', '', 'on' => 't.useid = members.id'),
 		);
 	}
 
