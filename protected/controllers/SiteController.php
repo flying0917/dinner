@@ -740,10 +740,10 @@ class SiteController extends FormerController
             //商家用户
             $shopdata = Shops::model()->find('useid=:id',array(':id'=>$member_id));
             $shopdata = CJSON::decode(CJSON::encode($shopdata));
-            $this->output(array('member' => $memberData,'shop'=>$shopdata));
+            $this->output(array('success'=>1,'member' => $memberData,'shop'=>$shopdata));
         }else{
             //普通用户
-            $this->output(array('member' => $memberData));
+            $this->output(array('success'=>1,'member' => $memberData));
         }
     }
 
